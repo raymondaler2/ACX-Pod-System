@@ -1,0 +1,26 @@
+Arguments: 
+  C:\Program Files\nodejs\node.exe C:\Users\Raymond\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add /
+
+PATH: 
+  C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64\compiler;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\nodejs\;C:\Users\Raymond\AppData\Local\Microsoft\WindowsApps;C:\Users\Raymond\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Raymond\AppData\Local\Programs\Git\cmd;C:\Users\Raymond\AppData\Roaming\npm
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  20.9.0
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: EPERM: operation not permitted, lstat 'C:\Config.Msi'
+
+npm manifest: 
+  No manifest
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
