@@ -1,8 +1,18 @@
+import { Grid, Stack } from "@mui/material";
+import NavSideBar from "./../components/NavSideBar.jsx";
+
 const Home = () => {
   return (
-    <>
-      <div>HOME PAGE</div>
-    </>
+    <Grid container spacing={2}>
+      <Grid item xs={1.9}>
+        <NavSideBar />
+      </Grid>
+      <Grid item xs={10.1}>
+        <Stack>
+          <div>Homepage PAGE</div>
+        </Stack>
+      </Grid>
+    </Grid>
   );
 };
 

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const UserRole = require("./userRole");
 
 const userSchema = mongoose.Schema(
   {
@@ -38,8 +39,9 @@ const userSchema = mongoose.Schema(
     position: {
       type: String,
     },
-    user_role_id: {
+    user_role: {
       type: String,
+      ref: UserRole,
     },
     pod_id: {
       type: String,
