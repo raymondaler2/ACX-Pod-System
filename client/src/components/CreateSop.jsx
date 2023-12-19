@@ -15,6 +15,9 @@ import {
   InputAdornment,
   Snackbar,
   Alert as MuiAlert,
+  Switch,
+  FormControlLabel,
+  ToggleButton,
 } from "@mui/material";
 import axios from "axios";
 import { createFilterOptions } from "@mui/material/Autocomplete";
@@ -23,12 +26,15 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
+import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 
 const CreateSop = (props) => {
   const filter = createFilterOptions();
   const { createClicked, handleClose, handleCreateClick } = props;
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [serviceTag, setServiceTag] = useState([]);
+  const [sopFeatured, setSopFeatured] = useState(false);
   const [sopTitle, setSopTitle] = useState("");
   const [sopServiceTag, setSopServiceTag] = useState("");
   const [sopDescription, setSopDescription] = useState("");
@@ -51,6 +57,7 @@ const CreateSop = (props) => {
   const handleSave = async () => {
     const sop = {
       user_id: localStorage.getItem("_id"),
+      featured: sopFeatured,
       sop_title: sopTitle,
       service_tag: sopServiceTag.service_tag,
       sop_description: sopDescription,
@@ -69,6 +76,10 @@ const CreateSop = (props) => {
       setSopPageTwo(false);
       setSnackbarOpen(true);
     }
+  };
+
+  const handleFeatured = () => {
+    setSopFeatured(!sopFeatured);
   };
 
   const handleAddChecklist = (milestoneIndex) => {
@@ -198,7 +209,26 @@ const CreateSop = (props) => {
           <DialogTitle>
             <Grid container>
               <Grid item xs={11.7}>
-                <p className="font-bold text-[28px] mb-[20px]">Create SOP</p>
+                <Stack direction="row">
+                  <p className="font-bold text-[28px] mb-[20px]">Create SOP</p>
+                  <ToggleButton
+                    onClick={handleFeatured}
+                    sx={{
+                      marginBottom: "20px",
+                      border: "none",
+                    }}
+                  >
+                    {!sopFeatured ? (
+                      <StarBorderOutlinedIcon />
+                    ) : (
+                      <StarOutlinedIcon
+                        sx={{
+                          color: "#FAC710",
+                        }}
+                      />
+                    )}
+                  </ToggleButton>
+                </Stack>
               </Grid>
               <Grid item xs={0.1}>
                 <IconButton
@@ -402,7 +432,26 @@ const CreateSop = (props) => {
         <DialogTitle>
           <Grid container>
             <Grid item xs={11.7}>
-              <p className="font-bold text-[28px] mb-[20px]">Create SOP</p>
+              <Stack direction="row">
+                <p className="font-bold text-[28px] mb-[20px]">Create SOP</p>
+                <ToggleButton
+                  onClick={handleFeatured}
+                  sx={{
+                    marginBottom: "20px",
+                    border: "none",
+                  }}
+                >
+                  {!sopFeatured ? (
+                    <StarBorderOutlinedIcon />
+                  ) : (
+                    <StarOutlinedIcon
+                      sx={{
+                        color: "#FAC710",
+                      }}
+                    />
+                  )}
+                </ToggleButton>
+              </Stack>
             </Grid>
             <Grid item xs={0.1}>
               <IconButton

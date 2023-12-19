@@ -26,8 +26,14 @@ const addSop = asyncHandler(async (req, res) => {
 
 const getAllSop = asyncHandler(async (req, res) => {
   try {
-    const sops = await Sop.find();
-    res.status(200).json(sops);
+    const sops = await Sop.find().populate("service_tag", "service_tag");
+
+    const formattedSops = sops.map((sop) => ({
+      ...sop.toObject(),
+      service_tag: sop.service_tag.service_tag,
+    }));
+
+    res.status(200).json(formattedSops);
   } catch (error) {
     res.status(500).json(`Get All Sop ERROR: ${error}`);
     console.error(`Get All Sop ERROR: ${error}`);
