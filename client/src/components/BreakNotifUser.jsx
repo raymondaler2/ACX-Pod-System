@@ -14,7 +14,7 @@ const BreakNotifUser = () => {
             paddingRight: "40px",
             paddingLeft: "40px",
             paddingTop: "0px",
-            paddingBottom: "px",
+            paddingBottom: "0px",
             marginRight: "30px",
             backgroundColor: "#F05524",
             "&:hover": {

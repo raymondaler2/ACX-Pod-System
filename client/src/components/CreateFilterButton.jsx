@@ -37,7 +37,11 @@ const CreateFilterButton = () => {
         >
           <FilterAltOutlinedIcon sx={{ color: "black" }} />
         </IconButton>
-        <CreateSop createClicked={createClicked} handleClose={handleClose} />
+        <CreateSop
+          createClicked={createClicked}
+          handleClose={handleClose}
+          handleCreateClick={handleCreateClick}
+        />
       </Box>
     </Box>
   );

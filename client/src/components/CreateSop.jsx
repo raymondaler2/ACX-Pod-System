@@ -4,109 +4,656 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Paper,
   TextField,
   Button,
+  InputLabel,
+  Grid,
+  Stack,
+  Autocomplete,
+  IconButton,
+  Divider,
+  InputAdornment,
+  Snackbar,
+  Alert as MuiAlert,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
-
-const StyledPaper = styled(Paper)({
-  borderRadius: "20px",
-  padding: "10px",
-});
+import axios from "axios";
+import { createFilterOptions } from "@mui/material/Autocomplete";
+import Textarea from "@mui/joy/Textarea";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import CloseIcon from "@mui/icons-material/Close";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
 
 const CreateSop = (props) => {
-  const { createClicked, handleClose } = props;
+  const filter = createFilterOptions();
+  const { createClicked, handleClose, handleCreateClick } = props;
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [serviceTag, setServiceTag] = useState([]);
+  const [sopTitle, setSopTitle] = useState("");
+  const [sopServiceTag, setSopServiceTag] = useState("");
+  const [sopDescription, setSopDescription] = useState("");
+  const [sopPageTwo, setSopPageTwo] = useState(false);
+  const [sopMilestones, setSopMilestones] = useState([
+    {
+      title: "",
+      description: "",
+      checklists: [
+        {
+          title: "",
+        },
+      ],
+    },
+  ]);
+  const [activeMilestone, setActiveMilestone] = useState(0);
+  const [milestoneDescription, setMilestoneDescription] = useState("");
+  const [checklistTitle, setChecklistTitle] = useState("");
 
-  const [sopData, setSopData] = useState({
-    sop_title: "",
-    service_tag: "",
-    sop_description: "",
-    user_id: "",
-    milestones: [],
-    comments: [],
-  });
+  const handleSave = async () => {
+    const sop = {
+      user_id: localStorage.getItem("_id"),
+      sop_title: sopTitle,
+      service_tag: sopServiceTag.service_tag,
+      sop_description: sopDescription,
+      milestones: sopMilestones.map((milestone) => ({
+        milestone_title: milestone.title,
+        milestone_description: milestone.description,
+        checklist: milestone.checklists.map((checklist) => ({
+          checklist_title: checklist.title,
+          checklist_status: false,
+        })),
+      })),
+    };
 
-  const handleSopTitleChange = (e) => {
-    setSopData({ ...sopData, sop_title: e.target.value });
+    const result = await axios.post("http://localhost:4000/api/sop", sop);
+    if (result.status === 200) {
+      setSopPageTwo(false);
+      setSnackbarOpen(true);
+    }
   };
 
-  const handleServiceTagChange = (e) => {
-    setSopData({ ...sopData, service_tag: e.target.value });
+  const handleAddChecklist = (milestoneIndex) => {
+    const newChecklist = { title: checklistTitle };
+    const updatedMilestones = [...sopMilestones];
+    updatedMilestones[milestoneIndex].checklists.push(newChecklist);
+    setSopMilestones(updatedMilestones);
+    setChecklistTitle("");
+  };
+
+  const handleRemoveChecklist = (milestoneIndex, checklistIndex) => {
+    const updatedMilestones = [...sopMilestones];
+    updatedMilestones[milestoneIndex].checklists.splice(checklistIndex, 1);
+    setSopMilestones(updatedMilestones);
+  };
+
+  const handleChecklistChange = (milestoneIndex, checklistIndex, value) => {
+    const updatedMilestones = [...sopMilestones];
+    updatedMilestones[milestoneIndex].checklists[checklistIndex].title = value;
+    setSopMilestones(updatedMilestones);
+  };
+
+  const handleMilestoneButtonClick = (index) => {
+    setActiveMilestone(index);
+    setMilestoneDescription(sopMilestones[index]?.description || "");
+  };
+
+  const handleMilestoneDescriptionChange = (e) => {
+    setMilestoneDescription(e.target.value);
+
+    const updatedMilestones = [...sopMilestones];
+    updatedMilestones[activeMilestone].description = e.target.value;
+    setSopMilestones(updatedMilestones);
+  };
+
+  const handleSopTitleChange = (e) => {
+    setSopTitle(e.target.value);
   };
 
   const handleSopDescriptionChange = (e) => {
-    setSopData({ ...sopData, sop_description: e.target.value });
+    setSopDescription(e.target.value);
   };
 
-  const handleUserIdChange = (e) => {
-    setSopData({ ...sopData, user_id: e.target.value });
+  const handleNext = () => {
+    handleClose();
+    setSopPageTwo(true);
   };
 
-  const handleMilestonesChange = (e) => {
-    setSopData({ ...sopData, milestones: e.target.value });
+  const handleAddMilestone = () => {
+    setSopMilestones([
+      ...sopMilestones,
+      { title: "", description: "", checklists: [{ title: "" }] },
+    ]);
   };
 
-  const handleCommentsChange = (e) => {
-    setSopData({ ...sopData, comments: e.target.value });
+  const handleRemoveMilestone = (index) => {
+    const updatedMilestones = [...sopMilestones];
+    updatedMilestones.splice(index, 1);
+    setSopMilestones(updatedMilestones);
   };
 
-  const handleSubmit = () => {
-    console.log(sopData);
+  const handleMilestoneChange = (index, value) => {
+    const updatedMilestones = [...sopMilestones];
+    updatedMilestones[index].title = value;
+    setSopMilestones(updatedMilestones);
+  };
+
+  const handleCancelclick = () => {
+    setSopTitle("");
+    setSopServiceTag("");
+    setSopMilestones([
+      {
+        title: "",
+        description: "",
+        checklists: [
+          {
+            title: "",
+          },
+        ],
+      },
+    ]);
+    setSopDescription("");
+    handleClose();
+  };
+
+  const handleCancelclickPageTwo = () => {
+    setSopPageTwo(false);
+    setSopTitle("");
+    setSopServiceTag("");
+    setSopMilestones([
+      {
+        title: "",
+        description: "",
+        checklists: [
+          {
+            title: "",
+          },
+        ],
+      },
+    ]);
+    setSopDescription("");
+  };
+
+  const fetchServiceTag = async () => {
+    const response = await axios.get("http://localhost:4000/api/sopServiceTag");
+    setServiceTag(response.data);
+  };
+
+  useEffect(() => {
+    fetchServiceTag();
+  }, []);
+
+  const customDialogStyles = {
+    borderRadius: "40px",
+    padding: "10px",
+    minWidth: "80rem",
   };
 
   return (
     <>
+      {serviceTag && (
+        <Dialog
+          maxWidth="xl"
+          open={createClicked}
+          PaperProps={{ style: customDialogStyles }}
+        >
+          <DialogTitle>
+            <Grid container>
+              <Grid item xs={11.7}>
+                <p className="font-bold text-[28px] mb-[20px]">Create SOP</p>
+              </Grid>
+              <Grid item xs={0.1}>
+                <IconButton
+                  color="black"
+                  variant="contained"
+                  onClick={handleCancelclick}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Grid>
+            </Grid>
+          </DialogTitle>
+          <DialogContent>
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <Stack>
+                  <InputLabel
+                    htmlFor="sop-title"
+                    sx={{
+                      fontWeight: "Bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    SOP Title
+                  </InputLabel>
+                  <TextField
+                    fullWidth
+                    id="sop-title"
+                    variant="outlined"
+                    label="Enter Title"
+                    value={sopTitle}
+                    onChange={handleSopTitleChange}
+                  />
+                  <InputLabel
+                    htmlFor="service-tag"
+                    sx={{
+                      fontWeight: "Bold",
+                      marginTop: "20px",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Service Tag
+                  </InputLabel>
+                  <Autocomplete
+                    fullWidth
+                    id="sop-service-tag"
+                    value={sopServiceTag}
+                    onChange={(event, newValue) => {
+                      if (typeof newValue === "string") {
+                        setSopServiceTag({
+                          service_tag: newValue,
+                        });
+                      } else if (newValue && newValue.inputValue) {
+                        setSopServiceTag({
+                          service_tag: newValue.inputValue,
+                        });
+                      } else {
+                        setSopServiceTag(newValue);
+                      }
+                    }}
+                    filterOptions={(options, params) => {
+                      const filtered = filter(options, params);
+
+                      const { inputValue } = params;
+                      const isExisting = options.some(
+                        (option) => inputValue === option.service_tag
+                      );
+
+                      if (inputValue !== "" && !isExisting) {
+                        filtered.push({
+                          inputValue,
+                          service_tag: `Add "${inputValue}"`,
+                        });
+                      }
+
+                      return filtered;
+                    }}
+                    selectOnFocus
+                    clearOnBlur
+                    handleHomeEndKeys
+                    options={serviceTag}
+                    getOptionLabel={(option) => {
+                      if (typeof option === "string") {
+                        return option;
+                      }
+                      if (option.inputValue) {
+                        return option.inputValue;
+                      }
+                      return option.service_tag;
+                    }}
+                    renderOption={(props, option) => (
+                      <li {...props}>{option.service_tag}</li>
+                    )}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="outlined"
+                        label="Choose Tag"
+                      />
+                    )}
+                  />
+                  <InputLabel
+                    htmlFor="sop-description"
+                    sx={{
+                      fontWeight: "Bold",
+                      marginTop: "20px",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    SOP Description
+                  </InputLabel>
+                  <Textarea
+                    minRows={2}
+                    maxRows={4}
+                    placeholder="Enter Description"
+                    size="lg"
+                    onChange={handleSopDescriptionChange}
+                    value={sopDescription}
+                  />
+                </Stack>
+              </Grid>
+              <Grid item xs={6}>
+                <Stack>
+                  <Grid container>
+                    <Grid item xs={10.75}>
+                      <InputLabel
+                        htmlFor="milestones"
+                        sx={{
+                          fontWeight: "Bold",
+                          marginBottom: "5px",
+                        }}
+                      >
+                        Milestones
+                      </InputLabel>
+                    </Grid>
+                    <Grid item xs={1.25}>
+                      <IconButton
+                        variant="contained"
+                        color="primary"
+                        onClick={handleAddMilestone}
+                        sx={{
+                          marginTop: "-15px",
+                        }}
+                      >
+                        <AddIcon />
+                      </IconButton>
+                    </Grid>
+                  </Grid>
+                  {sopMilestones.map((milestone, index) => (
+                    <div key={index} className="flex items-center mb-5">
+                      <TextField
+                        fullWidth
+                        variant="outlined"
+                        label={`Enter Milestone ${index + 1} Title`}
+                        value={milestone.title}
+                        onChange={(e) =>
+                          handleMilestoneChange(index, e.target.value)
+                        }
+                      />
+                      <DeleteIcon
+                        color="error"
+                        onClick={() => handleRemoveMilestone(index)}
+                        className="cursor-pointer ml-2"
+                      />
+                    </div>
+                  ))}
+                </Stack>
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions
+            sx={{ justifyContent: "flex-start", marginBottom: "20px" }}
+          >
+            <Button
+              onClick={handleNext}
+              variant="contained"
+              sx={{
+                textTransform: "none",
+                borderRadius: "10px",
+                paddingRight: "40px",
+                paddingLeft: "40px",
+                paddingTop: "5px",
+                paddingBottom: "5px",
+                marginLeft: "15px",
+                backgroundColor: "#17A1FA",
+                "&:hover": {
+                  backgroundColor: "#17A1FA",
+                },
+              }}
+            >
+              Next
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
       <Dialog
-        open={createClicked}
-        onClose={handleClose}
-        PaperComponent={(props) => <StyledPaper {...props} />}
+        maxWidth="xl"
+        open={sopPageTwo}
+        PaperProps={{ style: customDialogStyles }}
       >
         <DialogTitle>
-          <p className="font-bold text-[20px] mb-[20px]">Create SOP</p>
+          <Grid container>
+            <Grid item xs={11.7}>
+              <p className="font-bold text-[28px] mb-[20px]">Create SOP</p>
+            </Grid>
+            <Grid item xs={0.1}>
+              <IconButton
+                color="black"
+                variant="contained"
+                onClick={handleCancelclickPageTwo}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Grid>
+          </Grid>
         </DialogTitle>
         <DialogContent>
-          <TextField
-            variant="outlined"
-            label="SOP Title"
-            value={sopData.sop_title}
-            onChange={handleSopTitleChange}
-          />
-          <TextField
-            variant="outlined"
-            label="Service Tag"
-            value={sopData.service_tag}
-            onChange={handleServiceTagChange}
-          />
-          <TextField
-            variant="outlined"
-            label="SOP Description"
-            value={sopData.sop_description}
-            onChange={handleSopDescriptionChange}
-          />
-          <TextField
-            variant="outlined"
-            label="User ID"
-            value={sopData.user_id}
-            onChange={handleUserIdChange}
-          />
-          <TextField
-            variant="outlined"
-            label="Milestones"
-            value={sopData.milestones}
-            onChange={handleMilestonesChange}
-          />
-          <TextField
-            variant="outlined"
-            label="Comments"
-            value={sopData.comments}
-            onChange={handleCommentsChange}
-          />
+          <Stack direction="row">
+            <Stack
+              sx={{
+                maxWidth: "30rem",
+                paddingTop: "20px",
+                paddingBottom: "20px",
+                paddingLeft: "0px",
+                paddingRight: "40px",
+              }}
+            >
+              <p className="font-bold text-[22px] mb-[5px]">{sopTitle}</p>
+              <Grid
+                sx={{
+                  backgroundColor: "#FAC710",
+                  maxWidth: "100px",
+                  padding: "5px 10px",
+                  borderRadius: "20px",
+                }}
+              >
+                <p className="text-center text-[10px] font-bold">
+                  {sopServiceTag?.service_tag}
+                </p>
+              </Grid>
+              <p className="mt-[40px] mb-[40px]">{sopDescription}</p>
+              <InputLabel
+                sx={{
+                  fontWeight: "Bold",
+                  marginBottom: "5px",
+                }}
+              >
+                Milestones
+              </InputLabel>
+              <Stack>
+                {sopMilestones.map((milestone, index) => (
+                  <Stack direction="row">
+                    <Button
+                      key={index}
+                      variant={index === activeMilestone ? "contained" : "text"}
+                      onClick={() => handleMilestoneButtonClick(index)}
+                      sx={{
+                        color: index === activeMilestone ? "white" : "black",
+                        fontWeight: "bold",
+                        alignContent: "left",
+                        alignSelf: "left",
+                        justifyContent: "left",
+                        justifySelf: "left",
+                        textAlign: "left",
+                        marginBottom: "5px",
+                        textTransform: "none",
+                        minWidth: "24rem",
+                        backgroundColor:
+                          index === activeMilestone ? "#17A1FA" : "white",
+                        "&:hover": {
+                          backgroundColor:
+                            index === activeMilestone ? "#17A1FA" : "white",
+                        },
+                      }}
+                    >
+                      {milestone.title}
+                    </Button>
+                    <DeleteIcon
+                      color="error"
+                      onClick={() => handleRemoveMilestone(index)}
+                      className="cursor-pointer mt-1 ml-5"
+                    />
+                  </Stack>
+                ))}
+              </Stack>
+            </Stack>
+            <Divider orientation="vertical" flexItem />
+            <Stack
+              sx={{
+                maxWidth: "50rem",
+                paddingTop: "20px",
+                paddingBottom: "20px",
+                paddingLeft: "60px",
+              }}
+            >
+              {sopMilestones[activeMilestone] && (
+                <Stack>
+                  <p className="font-bold text-[22px] mb-[5px]">
+                    {sopMilestones[activeMilestone].title}
+                  </p>
+                  <InputLabel
+                    sx={{
+                      fontWeight: "Bold",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    Description
+                  </InputLabel>
+                  <Textarea
+                    minRows={2}
+                    maxRows={4}
+                    placeholder="Enter Description"
+                    size="lg"
+                    onChange={handleMilestoneDescriptionChange}
+                    value={milestoneDescription}
+                    sx={{
+                      minWidth: "40rem",
+                      minHeight: "10rem",
+                    }}
+                  />
+                  <InputLabel
+                    sx={{
+                      fontWeight: "Bold",
+                      marginBottom: "5px",
+                      marginTop: "20px",
+                    }}
+                  >
+                    <Grid container>
+                      <Grid item xs={10.75}>
+                        <InputLabel
+                          sx={{
+                            fontWeight: "Bold",
+                            marginBottom: "5px",
+                          }}
+                        >
+                          Checklist
+                        </InputLabel>
+                      </Grid>
+                      <Grid item xs={1.25}>
+                        <AddIcon
+                          color="primary"
+                          onClick={() => handleAddChecklist(activeMilestone)}
+                          className="cursor-pointer ml-2"
+                        />
+                      </Grid>
+                    </Grid>
+                  </InputLabel>
+                  <Stack>
+                    {sopMilestones[activeMilestone].checklists.map(
+                      (checklist, index) => (
+                        <div key={index} className="flex items-center mb-5">
+                          <TextField
+                            fullWidth
+                            variant="outlined"
+                            label={`Enter Checklist ${index + 1} Title`}
+                            value={checklist.title}
+                            onChange={(e) =>
+                              handleChecklistChange(
+                                activeMilestone,
+                                index,
+                                e.target.value
+                              )
+                            }
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <TaskAltIcon />
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                          <DeleteIcon
+                            color="error"
+                            onClick={() =>
+                              handleRemoveChecklist(activeMilestone, index)
+                            }
+                            className="cursor-pointer ml-4"
+                          />
+                        </div>
+                      )
+                    )}
+                  </Stack>
+                </Stack>
+              )}
+            </Stack>
+          </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleSubmit}>Create</Button>
+        <DialogActions
+          sx={{ justifyContent: "flex-start", marginBottom: "20px" }}
+        >
+          <Button
+            onClick={() => {
+              handleCreateClick();
+              setSopPageTwo(false);
+            }}
+            variant="contained"
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              paddingRight: "40px",
+              paddingLeft: "40px",
+              paddingTop: "5px",
+              paddingBottom: "5px",
+              marginLeft: "15px",
+              backgroundColor: "#B3B3B3",
+              "&:hover": {
+                backgroundColor: "#B3B3B3",
+              },
+            }}
+          >
+            Back
+          </Button>
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              paddingRight: "40px",
+              paddingLeft: "40px",
+              paddingTop: "5px",
+              paddingBottom: "5px",
+              marginLeft: "15px",
+              backgroundColor: "#17A1FA",
+              "&:hover": {
+                backgroundColor: "#17A1FA",
+              },
+            }}
+          >
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={1000}
+        onClose={() => {
+          setSnackbarOpen(false);
+        }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{
+          marginTop: "5rem",
+        }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          onClose={() => {
+            setSnackbarOpen(false);
+          }}
+          severity="success"
+        >
+          SOP Added to Knowledgebase
+        </MuiAlert>
+      </Snackbar>
     </>
   );
 };
