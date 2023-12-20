@@ -10,7 +10,6 @@ import axios from "axios";
 
 const Knowledgebase = () => {
   const [sopData, setSopData] = useState([]);
-  console.log("%c Line:12 🍪 sopData", "color:#2eafb0", sopData);
 
   const fetchSopData = async () => {
     const response = await axios.get("http://localhost:4000/api/sop");

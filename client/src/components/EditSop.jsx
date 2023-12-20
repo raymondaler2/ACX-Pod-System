@@ -27,9 +27,9 @@ import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
 
-const CreateSop = (props) => {
+const EditSop = (props) => {
   const filter = createFilterOptions();
-  const { createClicked, handleClose, handleCreateClick } = props;
+  const { editClicked, handleClose, handleEditClick, data } = props;
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [serviceTag, setServiceTag] = useState([]);
   const [sopFeatured, setSopFeatured] = useState(false);
@@ -69,7 +69,10 @@ const CreateSop = (props) => {
       })),
     };
 
-    const result = await axios.post("http://localhost:4000/api/sop", sop);
+    const result = await axios.put(
+      `http://localhost:4000/api/sop/${data._id}`,
+      sop
+    );
     if (result.status === 200) {
       setSopPageTwo(false);
       setSnackbarOpen(true);
@@ -146,39 +149,13 @@ const CreateSop = (props) => {
   };
 
   const handleCancelclick = () => {
-    setSopTitle("");
-    setSopServiceTag("");
-    setSopMilestones([
-      {
-        title: "",
-        description: "",
-        checklists: [
-          {
-            title: "",
-          },
-        ],
-      },
-    ]);
-    setSopDescription("");
+    fetchSopData();
     handleClose();
   };
 
   const handleCancelclickPageTwo = () => {
     setSopPageTwo(false);
-    setSopTitle("");
-    setSopServiceTag("");
-    setSopMilestones([
-      {
-        title: "",
-        description: "",
-        checklists: [
-          {
-            title: "",
-          },
-        ],
-      },
-    ]);
-    setSopDescription("");
+    fetchSopData();
   };
 
   const fetchServiceTag = async () => {
@@ -186,8 +163,29 @@ const CreateSop = (props) => {
     setServiceTag(response.data);
   };
 
+  const fetchSopData = () => {
+    setSopFeatured(data.featured);
+    setSopTitle(data.sop_title);
+    setSopServiceTag(data.service_tag);
+    setSopDescription(data.sop_description);
+    const transformedMilestones = data.milestones.map((milestone, index) => {
+      if (index === 0) {
+        setMilestoneDescription(milestone.milestone_description);
+      }
+      return {
+        title: milestone.milestone_title,
+        description: milestone.milestone_description,
+        checklists: milestone.checklist.map((checklist) => ({
+          title: checklist.checklist_title,
+        })),
+      };
+    });
+    setSopMilestones(transformedMilestones);
+  };
+
   useEffect(() => {
     fetchServiceTag();
+    fetchSopData();
   }, []);
 
   const customDialogStyles = {
@@ -201,14 +199,14 @@ const CreateSop = (props) => {
       {serviceTag && (
         <Dialog
           maxWidth="xl"
-          open={createClicked}
+          open={editClicked}
           PaperProps={{ style: customDialogStyles }}
         >
           <DialogTitle>
             <Grid container>
               <Grid item xs={11.7}>
                 <Stack direction="row">
-                  <p className="font-bold text-[28px] mb-[20px]">Create SOP</p>
+                  <p className="font-bold text-[28px] mb-[20px]">Edit SOP</p>
                   <ToggleButton
                     onClick={handleFeatured}
                     sx={{
@@ -411,13 +409,32 @@ const CreateSop = (props) => {
                 paddingTop: "5px",
                 paddingBottom: "5px",
                 marginLeft: "15px",
+                backgroundColor: "#B3B3B3",
+                "&:hover": {
+                  backgroundColor: "#B3B3B3",
+                },
+              }}
+            >
+              Next
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              sx={{
+                textTransform: "none",
+                borderRadius: "10px",
+                paddingRight: "40px",
+                paddingLeft: "40px",
+                paddingTop: "5px",
+                paddingBottom: "5px",
+                marginLeft: "15px",
                 backgroundColor: "#17A1FA",
                 "&:hover": {
                   backgroundColor: "#17A1FA",
                 },
               }}
             >
-              Next
+              Save
             </Button>
           </DialogActions>
         </Dialog>
@@ -431,7 +448,7 @@ const CreateSop = (props) => {
           <Grid container>
             <Grid item xs={11.7}>
               <Stack direction="row">
-                <p className="font-bold text-[28px] mb-[20px]">Create SOP</p>
+                <p className="font-bold text-[28px] mb-[20px]">Edit SOP</p>
                 <ToggleButton
                   onClick={handleFeatured}
                   sx={{
@@ -483,7 +500,7 @@ const CreateSop = (props) => {
                 }}
               >
                 <p className="text-center text-[10px] font-bold">
-                  {sopServiceTag?.service_tag}
+                  {sopServiceTag?.service_tag || sopServiceTag}
                 </p>
               </Grid>
               <p className="mt-[40px] mb-[40px]">{sopDescription}</p>
@@ -638,7 +655,7 @@ const CreateSop = (props) => {
         >
           <Button
             onClick={() => {
-              handleCreateClick();
+              handleEditClick();
               setSopPageTwo(false);
             }}
             variant="contained"
@@ -684,6 +701,7 @@ const CreateSop = (props) => {
         autoHideDuration={1000}
         onClose={() => {
           setSnackbarOpen(false);
+          window.location.reload();
         }}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         sx={{
@@ -698,11 +716,11 @@ const CreateSop = (props) => {
           }}
           severity="success"
         >
-          SOP Added to Knowledgebase
+          SOP Sucessfully Edited
         </MuiAlert>
       </Snackbar>
     </>
   );
 };
 
-export default CreateSop;
+export default EditSop;
