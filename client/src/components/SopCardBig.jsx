@@ -60,8 +60,9 @@ const SopCardBig = (props) => {
   };
 
   const publisherName = async () => {
+    const site = import.meta.env.VITE_SITE;
     const user = await axios.get(
-      `http://localhost:3000/api/user/${data?.user_id}`
+      `http://${site}:3000/api/user/${data?.user_id}`
     );
     SetPublisher(`${user?.data.work_email}`);
   };

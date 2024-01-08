@@ -18,8 +18,9 @@ const SopCard = (props) => {
   );
 
   const fetchUser = async () => {
+    const site = import.meta.env.VITE_SITE;
     const response = await axios.get(
-      `http://localhost:3000/api/user/${sop.user_id}`
+      `http://${site}:3000/api/user/${sop.user_id}`
     );
     setUserData(response.data);
   };

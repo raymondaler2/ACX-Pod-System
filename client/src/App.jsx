@@ -11,7 +11,8 @@ const App = () => {
   const [sopIDs, setSopIDs] = useState([]);
 
   const fetchSopIDs = async () => {
-    const response = await axios.get("http://localhost:4000/api/sop/all/id/");
+    const site = import.meta.env.VITE_SITE;
+    const response = await axios.get(`http://${site}:4000/api/sop/all/id/`);
     setSopIDs(response.data);
   };
 

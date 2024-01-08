@@ -44,7 +44,8 @@ const Login = () => {
 
   const LoginUser = async (email, password) => {
     try {
-      const login = await axios.post(`http://localhost:3000/api/user/login`, {
+      const site = import.meta.env.VITE_SITE;
+      const login = await axios.post(`http://${site}:3000/api/user/login`, {
         work_email: email,
         password: password,
       });

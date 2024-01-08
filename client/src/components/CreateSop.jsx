@@ -69,7 +69,8 @@ const CreateSop = (props) => {
       })),
     };
 
-    const result = await axios.post("http://localhost:4000/api/sop", sop);
+    const site = import.meta.env.VITE_SITE;
+    const result = await axios.post(`http://${site}:4000/api/sop`, sop);
     if (result.status === 200) {
       setSopPageTwo(false);
       setSnackbarOpen(true);
@@ -182,7 +183,8 @@ const CreateSop = (props) => {
   };
 
   const fetchServiceTag = async () => {
-    const response = await axios.get("http://localhost:4000/api/sopServiceTag");
+    const site = import.meta.env.VITE_SITE;
+    const response = await axios.get(`http://${site}:4000/api/sopServiceTag`);
     setServiceTag(response.data);
   };
 

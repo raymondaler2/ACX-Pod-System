@@ -69,8 +69,9 @@ const EditSop = (props) => {
       })),
     };
 
+    const site = import.meta.env.VITE_SITE;
     const result = await axios.put(
-      `http://localhost:4000/api/sop/${data._id}`,
+      `http://${site}:4000/api/sop/${data._id}`,
       sop
     );
     if (result.status === 200) {
@@ -159,7 +160,8 @@ const EditSop = (props) => {
   };
 
   const fetchServiceTag = async () => {
-    const response = await axios.get("http://localhost:4000/api/sopServiceTag");
+    const site = import.meta.env.VITE_SITE;
+    const response = await axios.get(`http://${site}:4000/api/sopServiceTag`);
     setServiceTag(response.data);
   };
 

@@ -12,7 +12,8 @@ const Knowledgebase = () => {
   const [sopData, setSopData] = useState([]);
 
   const fetchSopData = async () => {
-    const response = await axios.get("http://localhost:4000/api/sop");
+    const site = import.meta.env.VITE_SITE;
+    const response = await axios.get(`http://${site}:4000/api/sop`);
     setSopData(response.data);
   };
 
