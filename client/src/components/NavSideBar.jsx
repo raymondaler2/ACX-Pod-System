@@ -115,7 +115,7 @@ const NavSideBar = () => {
                   className="font-bold ml-[20px] text-base"
                   style={{ color: "black", textDecoration: "none" }}
                 >
-                  HelpAndSupport
+                  Help & Support
                 </span>
               </Button>
             </Stack>
