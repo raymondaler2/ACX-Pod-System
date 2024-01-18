@@ -34,7 +34,7 @@ const Knowledgebase = () => {
           }}
         >
           <Grid container spacing={2}>
-            <Grid item xs={1.5}>
+            <Grid item xs={1.5} justifyContent="flex-start">
               <CreateFilterButton />
             </Grid>
             <Grid item xs={7.5}>
@@ -54,7 +54,7 @@ const Knowledgebase = () => {
             <Box
               sx={{
                 minHeight: "47rem",
-                marginLeft: "3rem",
+                marginLeft: "2rem",
               }}
             >
               <p className="font-bold text-[20px] mb-[20px]">Featured SOP</p>

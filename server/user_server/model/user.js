@@ -44,7 +44,7 @@ const userSchema = mongoose.Schema(
     pod_designation: {
       type: String,
     },
-    user_role: {
+    role: {
       type: String,
       ref: UserRole,
     },

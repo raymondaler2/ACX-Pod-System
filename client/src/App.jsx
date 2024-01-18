@@ -6,6 +6,7 @@ import NotFound from "./pages/NotFound.jsx";
 import { useEffect, useState } from "react";
 import KnowledgebaseSOP from "./components/KnowledgebaseSOP.jsx";
 import CreateUser from "./pages/CreateUser.jsx";
+import Users from "./pages/Users.jsx";
 import axios from "axios";
 
 const App = () => {
@@ -24,6 +25,7 @@ const App = () => {
   return (
     <>
       <Routes>
+        <Route path="/Users" element={<Users />} />
         <Route path="/CreateUser" element={<CreateUser />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/" element={<Home />} />
