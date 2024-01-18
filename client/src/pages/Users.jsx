@@ -12,6 +12,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import NavSideBar from "./../components/NavSideBar.jsx";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { useState } from "react";
+import SearchFilter from './../components/SearchFilter.jsx';
 
 const Users = () => {
   const [selectedRow, setSelectedRow] = useState(null);
@@ -88,6 +89,7 @@ const Users = () => {
             </Grid>
             <Grid item xs={3} container justifyContent="flex-end">
               {/* <BreakNotifUser /> */}
+              <SearchFilter />
             </Grid>
           </Grid>
         </Box>
