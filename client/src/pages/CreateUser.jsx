@@ -87,6 +87,22 @@ const CreateUser = () => {
     setPassword(shuffledPassword);
   };
 
+  const clearData = () => {
+    setFirstName("");
+    setLastName("");
+    setBirthday(null);
+    setEmail("");
+    setContactNumber("");
+    setEmergencyContact("");
+    setRelationship("");
+    setEmergencyNumber("");
+    setUsername("");
+    setPosition("");
+    setRole("");
+    setPassword("");
+    setShowPassword(false);
+  };
+
   const handleCreateUser = async () => {
     const dateObject = birthday instanceof dayjs ? birthday.toDate() : null;
 
@@ -97,7 +113,7 @@ const CreateUser = () => {
       : null;
 
     const site = import.meta.env.VITE_SITE;
-    const result = await axios.post(`http://${site}:3000/api/user`, {
+    await axios.post(`http://${site}:3000/api/user`, {
       first_name: firstName,
       last_name: lastName,
       birthday: formattedBirthday,
@@ -109,9 +125,10 @@ const CreateUser = () => {
       username,
       password,
       position,
-      podDesignation,
-      user_role: role,
+      pod_designation: podDesignation,
+      role,
     });
+    clearData();
   };
 
   const fetchOptions = async () => {
@@ -126,9 +143,9 @@ const CreateUser = () => {
 
   const fetchRoles = async () => {
     const site = import.meta.env.VITE_SITE;
-    const response = await axios.get(`http://${site}:3000/api/userRoleRoute/`);
+    const response = await axios.get(`http://${site}:3000/api/userRole/`);
     const formattedRoles = response.data.map((item) => ({
-      label: item.position,
+      label: item.role,
     }));
 
     setRoleOptions(formattedRoles);
@@ -273,7 +290,7 @@ const CreateUser = () => {
                     .replace('"', "");
                   setPosition(extractedValue);
                 } else {
-                  setPosition("");
+                  setPosition(newValue.label);
                 }
               }}
               getOptionLabel={(option) =>
@@ -321,7 +338,7 @@ const CreateUser = () => {
                       .replace('"', "");
                     setRole(extractedValue);
                   } else {
-                    setRole("");
+                    setRole(newValue.label);
                   }
                 }}
                 getOptionLabel={(option) =>
@@ -365,9 +382,7 @@ const CreateUser = () => {
                   onChange={handlePodDesignationChange}
                   label="POD Designation"
                 >
-                  <MenuItem value="A">A</MenuItem>
-                  <MenuItem value="B">B</MenuItem>
-                  <MenuItem value="C">C</MenuItem>
+                  <MenuItem value="Edda POD">Edda POD</MenuItem>
                 </Select>
               </FormControl>
             </Stack>

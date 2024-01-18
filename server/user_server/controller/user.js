@@ -6,29 +6,29 @@ const UserRole = require("./../model/userRole");
 
 const addUser = asyncHandler(async (req, res) => {
   try {
-    const { position, user_role, ...userData } = req.body;
+    const { position, role, ...userData } = req.body;
 
     let existingPosition = await UserPosition.findOne({ position });
-    let existingUserRole = await UserRole.findOne({ user_role });
+    let existingUserRole = await UserRole.findOne({ role });
 
     if (!existingPosition) {
       existingPosition = await UserPosition.create({ position });
     }
 
     if (!existingUserRole) {
-      existingUserRole = await UserRole.create({ user_role });
+      existingUserRole = await UserRole.create({ role });
     }
 
     const user = await User.create({
       ...userData,
       position: existingPosition._id,
-      user_role: existingUserRole._id,
+      role: existingUserRole._id,
     });
 
     res.status(200).json(`User Created: ${user._id}`);
   } catch (error) {
-    res.status(500).json(`Add User by Id ERROR: ${error}`);
-    console.error(`Add User by Id ERROR: ${error}`);
+    res.status(500).json(`Add User by ERROR: ${error}`);
+    console.error(`Add User by ERROR: ${error}`);
   }
 });
 
@@ -49,7 +49,10 @@ const deleteUser = asyncHandler(async (req, res) => {
 
 const getAllUser = asyncHandler(async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find({ work_email: { $ne: "admin" } })
+      .populate("position", "position")
+      .populate("role", "role");
+
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json(`Get All Users ERROR: ${error}`);

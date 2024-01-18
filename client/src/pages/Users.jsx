@@ -11,52 +11,88 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import NavSideBar from "./../components/NavSideBar.jsx";
 import PerfectScrollbar from "react-perfect-scrollbar";
-import { useState } from "react";
-import SearchFilter from './../components/SearchFilter.jsx';
+import { useEffect, useState } from "react";
+import SearchFilter from "./../components/SearchFilter.jsx";
 import CreateButtonUsers from "../components/CreateButtonUsers.jsx";
+import axios from "axios";
 
 const Users = () => {
+  const [rows, SetRows] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const columns = [
-    { field: "lastName", headerName: "Last Name", flex: 1 },
-    { field: "firstName", headerName: "First Name", flex: 1 },
-    { field: "position", headerName: "Position", flex: 1 },
-    { field: "role", headerName: "Role", flex: 1 },
-    { field: "podDesignation", headerName: "Pod Designation", flex: 1 },
-    { field: "status", headerName: "Status", flex: 1 },
+    {
+      field: "lastName",
+      headerName: "Last Name",
+      flex: 1,
+      renderCell: (params) => <strong>{params.row.lastName}</strong>,
+      headerClassName: "text-gray-400 font-black",
+    },
+    {
+      field: "firstName",
+      headerName: "First Name",
+      flex: 1,
+      renderCell: (params) => <strong>{params.row.firstName}</strong>,
+      headerClassName: "text-gray-400 font-black",
+    },
+    {
+      field: "position",
+      headerName: "Position",
+      flex: 1,
+      renderCell: (params) => (
+        <span style={{ color: "#B3B3B3" }}>{params.row.position}</span>
+      ),
+      headerClassName: "text-gray-400 font-black",
+    },
+    {
+      field: "role",
+      headerName: "Role",
+      flex: 1,
+      renderCell: (params) => (
+        <span style={{ color: "#B3B3B3" }}>{params.row.role}</span>
+      ),
+      headerClassName: "text-gray-400 font-black",
+    },
+    {
+      field: "podDesignation",
+      headerName: "Pod Designation",
+      flex: 1,
+      renderCell: (params) => (
+        <span style={{ color: "#B3B3B3" }}>{params.row.podDesignation}</span>
+      ),
+      headerClassName: "text-gray-400 font-black",
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 1,
+      headerClassName: "text-gray-400 font-black",
+    },
   ];
 
-  const rows = [
-    {
-      id: 1,
-      lastName: "Doe",
-      firstName: "John",
-      position: "Developer",
-      role: "Engineer",
-      podDesignation: "Pod A",
-      status: "Active",
-    },
-    {
-      id: 2,
-      lastName: "Smith",
-      firstName: "Jane",
-      position: "Designer",
-      role: "Designer",
-      podDesignation: "Pod B",
-      status: "Inactive",
-    },
-    {
-      id: 3,
-      lastName: "Johnson",
-      firstName: "Bob",
-      position: "Manager",
-      role: "Manager",
-      podDesignation: "Pod C",
-      status: "Active",
-    },
-    // Add more rows as needed
-  ];
+  const mapUserData = (userData) => {
+    return userData.map((user, index) => ({
+      id: index + 1,
+      lastName: user.last_name,
+      firstName: user.first_name,
+      position: user.position.position,
+      role: user.role.role,
+      podDesignation: user.pod_designation,
+      status: "Active", // TEMP
+    }));
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const site = import.meta.env.VITE_SITE;
+      const response = await axios.get(`http://${site}:3000/api/user/`);
+      const mappedRows = mapUserData(response.data);
+      SetRows(mappedRows);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
 
   const handleRowClick = (params) => {
     setSelectedRow(params.row);
@@ -67,6 +103,10 @@ const Users = () => {
     setIsDialogOpen(false);
   };
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={1.9}>
@@ -76,20 +116,17 @@ const Users = () => {
         <Box
           sx={{
             marginTop: "40px",
-            marginBottom: "30px",
+            marginBottom: "1rem",
             marginLeft: "50px",
           }}
         >
-          <p className="text-5xl font-bold">Users</p>
+          <p className="text-5xl font-bold mb-4">Users</p>
           <Grid container spacing={2}>
             <Grid item xs={1.5}>
               <CreateButtonUsers />
             </Grid>
-            <Grid item xs={7.5}>
-              {/* <SearchbarWide /> */}
-            </Grid>
+            <Grid item xs={7.5}></Grid>
             <Grid item xs={3} container justifyContent="flex-end">
-              {/* <BreakNotifUser /> */}
               <SearchFilter />
             </Grid>
           </Grid>
@@ -117,7 +154,7 @@ const Users = () => {
                   rows={rows}
                   checkboxSelection
                   onRowClick={handleRowClick}
-                  sx={{ border: "none", minHeight: "46rem" }}
+                  sx={{ border: "none", minHeight: "41.5rem" }}
                   disableRowSelectionOnClick
                 />
               </Card>

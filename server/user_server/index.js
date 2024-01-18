@@ -14,7 +14,7 @@ app.use(express.json());
 
 app.use("/api/user", userRoute);
 app.use("/api/userPosition", userPositionRoute);
-app.use("/api/userRoleRoute", userRoleRoute);
+app.use("/api/userRole", userRoleRoute);
 
 mongoose.set("strictQuery", false);
 
