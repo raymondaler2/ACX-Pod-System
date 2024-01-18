@@ -1,5 +1,6 @@
 import { Box, Card, Grid } from "@mui/material";
 import NavSideBar from "./../components/NavSideBar.jsx";
+import CreateButtonUsers from "../components/CreateButtonUsers.jsx";
 
 const Users = () => {
   return (
@@ -18,7 +19,7 @@ const Users = () => {
           <p className="text-5xl font-bold">Users</p>
           <Grid container spacing={2}>
             <Grid item xs={1.5}>
-              {/* <CreateFilterButton /> */}
+              <CreateButtonUsers />
             </Grid>
             <Grid item xs={7.5}>
               {/* <SearchbarWide /> */}
