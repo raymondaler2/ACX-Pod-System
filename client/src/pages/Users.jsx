@@ -1,6 +1,6 @@
 import { Box, Card, Grid } from "@mui/material";
 import NavSideBar from "./../components/NavSideBar.jsx";
-
+import SearchFilter from './../components/SearchFilter.jsx';
 const Users = () => {
   return (
     <Grid container spacing={2}>
@@ -25,6 +25,7 @@ const Users = () => {
             </Grid>
             <Grid item xs={3} container justifyContent="flex-end">
               {/* <BreakNotifUser /> */}
+              <SearchFilter />
             </Grid>
           </Grid>
         </Box>
