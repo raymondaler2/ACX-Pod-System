@@ -1,7 +1,70 @@
-import { Box, Card, Grid } from "@mui/material";
+import {
+  Box,
+  Card,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import NavSideBar from "./../components/NavSideBar.jsx";
+import PerfectScrollbar from "react-perfect-scrollbar";
+import { useState } from "react";
 
 const Users = () => {
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const columns = [
+    { field: "lastName", headerName: "Last Name", flex: 1 },
+    { field: "firstName", headerName: "First Name", flex: 1 },
+    { field: "position", headerName: "Position", flex: 1 },
+    { field: "role", headerName: "Role", flex: 1 },
+    { field: "podDesignation", headerName: "Pod Designation", flex: 1 },
+    { field: "status", headerName: "Status", flex: 1 },
+  ];
+
+  const rows = [
+    {
+      id: 1,
+      lastName: "Doe",
+      firstName: "John",
+      position: "Developer",
+      role: "Engineer",
+      podDesignation: "Pod A",
+      status: "Active",
+    },
+    {
+      id: 2,
+      lastName: "Smith",
+      firstName: "Jane",
+      position: "Designer",
+      role: "Designer",
+      podDesignation: "Pod B",
+      status: "Inactive",
+    },
+    {
+      id: 3,
+      lastName: "Johnson",
+      firstName: "Bob",
+      position: "Manager",
+      role: "Manager",
+      podDesignation: "Pod C",
+      status: "Active",
+    },
+    // Add more rows as needed
+  ];
+
+  const handleRowClick = (params) => {
+    setSelectedRow(params.row);
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+  };
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={1.9}>
@@ -28,22 +91,55 @@ const Users = () => {
             </Grid>
           </Grid>
         </Box>
-        <Card
-          sx={{
-            margin: "25px",
-            borderRadius: "40px",
-            minHeight: "95vh",
-          }}
-        >
-          <Box
-            sx={{
-              margin: "45px",
-              maxHeight: "100%",
-              overflowY: "auto",
+        <Box>
+          <PerfectScrollbar
+            style={{
+              marginRight: "20px",
             }}
-          ></Box>
-        </Card>
+          >
+            <Box
+              sx={{
+                minHeight: "47rem",
+                marginLeft: "2rem",
+              }}
+            >
+              <Card
+                sx={{
+                  borderRadius: "40px",
+                  padding: "20px",
+                }}
+              >
+                <DataGrid
+                  columns={columns}
+                  rows={rows}
+                  checkboxSelection
+                  onRowClick={handleRowClick}
+                  sx={{ border: "none", minHeight: "46rem" }}
+                  disableRowSelectionOnClick
+                />
+              </Card>
+            </Box>
+          </PerfectScrollbar>
+        </Box>
       </Grid>
+      <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
+        <DialogTitle>User Details</DialogTitle>
+        <DialogContent>
+          {selectedRow && (
+            <div>
+              <p>Last Name: {selectedRow.lastName}</p>
+              <p>First Name: {selectedRow.firstName}</p>
+              <p>Position: {selectedRow.position}</p>
+              <p>Role: {selectedRow.role}</p>
+              <p>Pod Designation: {selectedRow.podDesignation}</p>
+              <p>Status: {selectedRow.status}</p>
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };

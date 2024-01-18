@@ -17,6 +17,7 @@
     "@mui/icons-material": "^5.14.16",
     "@mui/joy": "^5.0.0-beta.18",
     "@mui/material": "^5.14.17",
+    "@mui/x-data-grid": "^6.18.7",
     "@mui/x-date-pickers": "^6.18.7",
     "@supercharge/strings": "^2.0.0",
     "axios": "^1.6.1",
