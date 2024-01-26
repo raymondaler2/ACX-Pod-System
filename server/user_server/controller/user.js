@@ -3,13 +3,15 @@ const asyncHandler = require("express-async-handler");
 const jwt = require("jsonwebtoken");
 const UserPosition = require("./../model/userPosition");
 const UserRole = require("./../model/userRole");
+const UserRelationship = require("./../model/userRelationship");
 
 const addUser = asyncHandler(async (req, res) => {
   try {
-    const { position, role, ...userData } = req.body;
+    const { position, role, relationship, ...userData } = req.body;
 
     let existingPosition = await UserPosition.findOne({ position });
     let existingUserRole = await UserRole.findOne({ role });
+    let existingRelationship = await UserRelationship.findOne({ relationship });
 
     if (!existingPosition) {
       existingPosition = await UserPosition.create({ position });
@@ -19,10 +21,15 @@ const addUser = asyncHandler(async (req, res) => {
       existingUserRole = await UserRole.create({ role });
     }
 
+    if (!existingRelationship) {
+      existingRelationship = await UserRelationship.create({ relationship });
+    }
+
     const user = await User.create({
       ...userData,
       position: existingPosition._id,
       role: existingUserRole._id,
+      relationship: existingRelationship._id,
     });
 
     res.status(200).json(`User Created: ${user._id}`);

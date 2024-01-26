@@ -469,6 +469,7 @@ const CreateSop = (props) => {
             <Stack
               sx={{
                 maxWidth: "30rem",
+                minWidth: "30rem",
                 paddingTop: "20px",
                 paddingBottom: "20px",
                 paddingLeft: "0px",

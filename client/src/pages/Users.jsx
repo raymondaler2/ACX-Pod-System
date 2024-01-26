@@ -27,47 +27,41 @@ const Users = () => {
       headerName: "Last Name",
       flex: 1,
       renderCell: (params) => <strong>{params.row.lastName}</strong>,
-      headerClassName: "text-gray-400 font-black",
+      headerClassName: "font-black",
     },
     {
       field: "firstName",
       headerName: "First Name",
       flex: 1,
       renderCell: (params) => <strong>{params.row.firstName}</strong>,
-      headerClassName: "text-gray-400 font-black",
+      headerClassName: "font-black",
     },
     {
       field: "position",
       headerName: "Position",
       flex: 1,
-      renderCell: (params) => (
-        <span style={{ color: "#B3B3B3" }}>{params.row.position}</span>
-      ),
-      headerClassName: "text-gray-400 font-black",
+      renderCell: (params) => <span>{params.row.position}</span>,
+      headerClassName: "font-black",
     },
     {
       field: "role",
       headerName: "Role",
       flex: 1,
-      renderCell: (params) => (
-        <span style={{ color: "#B3B3B3" }}>{params.row.role}</span>
-      ),
-      headerClassName: "text-gray-400 font-black",
+      renderCell: (params) => <span>{params.row.role}</span>,
+      headerClassName: "font-black",
     },
     {
       field: "podDesignation",
       headerName: "Pod Designation",
       flex: 1,
-      renderCell: (params) => (
-        <span style={{ color: "#B3B3B3" }}>{params.row.podDesignation}</span>
-      ),
-      headerClassName: "text-gray-400 font-black",
+      renderCell: (params) => <span>{params.row.podDesignation}</span>,
+      headerClassName: "font-black",
     },
     {
       field: "status",
       headerName: "Status",
       flex: 1,
-      headerClassName: "text-gray-400 font-black",
+      headerClassName: "font-black",
     },
   ];
 

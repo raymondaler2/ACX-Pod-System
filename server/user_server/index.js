@@ -5,6 +5,7 @@ const cors = require("cors");
 const userRoute = require("./view/user");
 const userPositionRoute = require("./view/userPosition");
 const userRoleRoute = require("./view/userRole");
+const userRelationshipRoute = require("./view/userRelationship");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const MONGO_URL = process.env.MONGO_URL;
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api/user", userRoute);
 app.use("/api/userPosition", userPositionRoute);
 app.use("/api/userRole", userRoleRoute);
+app.use("/api/userRelationship", userRelationshipRoute);
 
 mongoose.set("strictQuery", false);
 
