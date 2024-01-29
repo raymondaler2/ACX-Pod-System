@@ -259,7 +259,10 @@ const CreateUser = (props) => {
     const response = await axios.get(
       `http://${site}:3000/api/userRelationship`
     );
-    setRelationshipOptions(response.data);
+    const formattedRelationships = response.data.map((item) => ({
+      label: item.relationship,
+    }));
+    setRelationshipOptions(formattedRelationships);
   };
 
   const fetchOptions = async () => {

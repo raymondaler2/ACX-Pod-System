@@ -56,7 +56,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 
 const getAllUser = asyncHandler(async (req, res) => {
   try {
-    const users = await User.find({ work_email: { $ne: "admin" } })
+    const users = await User.find({ username: { $ne: "acx_super_admin" } })
       .populate("position", "position")
       .populate("role", "role");
 
@@ -69,26 +69,24 @@ const getAllUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
   try {
-    const { work_email, password } = req.body;
-    if (!work_email || !password) {
+    const { username, password } = req.body;
+    if (!username || !password) {
       res
         .status(400)
-        .json(
-          "Login User ERROR: Email or username and password are required for login"
-        );
+        .json("Login User ERROR: username and password are required for login");
       console.error(
-        "Login User ERROR: Email or username and password are required for login"
+        "Login User ERROR: username and password are required for login"
       );
     }
 
-    const user = await User.findOne({ work_email });
+    const user = await User.findOne({ username });
 
     if (user && (await user.matchPassword(password))) {
       const secretKey = process.env.JWT_SECRET;
 
       const token = jwt.sign(
         {
-          workEmail: user.email,
+          user: user.username,
           userId: user._id,
         },
         secretKey,
@@ -100,10 +98,8 @@ const loginUser = asyncHandler(async (req, res) => {
         _id: user._id,
       });
     } else {
-      res
-        .status(401)
-        .json("Login User ERROR: Invalid email or username or password");
-      console.error("Login User ERROR: Invalid email or username or password");
+      res.status(401).json("Login User ERROR: Invalid username or password");
+      console.error("Login User ERROR: Invalid username or password");
     }
   } catch (error) {
     res.status(500).json(`Login User ERROR: ${error}`);
