@@ -54,7 +54,7 @@ const EditSop = (props) => {
 
   const handleSave = async () => {
     const sop = {
-      user_id: localStorage.getItem("_id"),
+      edit_user_id: localStorage.getItem("_id"),
       featured: sopFeatured,
       sop_title: sopTitle,
       service_tag: sopServiceTag.service_tag,

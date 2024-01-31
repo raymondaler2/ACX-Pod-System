@@ -40,6 +40,7 @@ const SopCardBig = (props) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editClicked, setEditClicked] = useState(false);
   const [publisher, SetPublisher] = useState("");
+  const [editor, SetEditor] = useState("");
   const dateObjectPublished = new Date(data?.createdAt);
   const options = { year: "numeric", month: "long", day: "numeric" };
   const formattedDatePublished = new Intl.DateTimeFormat(
@@ -89,11 +90,25 @@ const SopCardBig = (props) => {
     const user = await axios.get(
       `http://${site}:3000/api/user/${data?.user_id}`
     );
-    SetPublisher(`${user?.data.work_email}`);
+    SetPublisher(`${user?.data.first_name} ${user?.data.last_name}`);
+  };
+
+  const editorName = async () => {
+    if (data?.edit_user_id.length > 0) {
+      const site = import.meta.env.VITE_SITE;
+      const user = await axios.get(
+        `http://${site}:3000/api/user/${data?.edit_user_id}`
+      );
+
+      SetEditor(`${user?.data.first_name} ${user?.data.last_name}`);
+      return;
+    }
+    SetEditor(`None`);
   };
 
   useEffect(() => {
     publisherName();
+    editorName();
   }, []);
 
   return (
@@ -259,7 +274,7 @@ const SopCardBig = (props) => {
                     </h2>
                   </Grid>
                   <Grid item xs={6}>
-                    <h2 className="text-[14px] mt-[10px]">{publisher}</h2>
+                    <h2 className="text-[14px] mt-[10px]">{editor}</h2>
                   </Grid>
                   <Grid item xs={6}>
                     <h2 className="text-[14px] font-bold mt-[10px]">
@@ -370,7 +385,7 @@ const SopCardBig = (props) => {
           }}
           severity="success"
         >
-          Sop Deleted
+          SOP Deleted
         </MuiAlert>
       </Snackbar>
     </Card>

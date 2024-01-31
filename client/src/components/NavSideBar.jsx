@@ -119,8 +119,7 @@ const NavSideBar = () => {
                 </span>
               </Button>
             </Stack>
-            {userData?.role.role === "Admin" ||
-            userData?.username === "acx_super_admin" ? (
+            {userData?.role.role === "Admin" ? (
               <Stack direction="row" width="100%" pt={1} pb={1}>
                 <Button
                   component={Link}
@@ -139,8 +138,7 @@ const NavSideBar = () => {
             ) : (
               <></>
             )}
-            {userData?.role.role === "Admin" ||
-            userData?.username === "acx_super_admin" ? (
+            {userData?.role.role === "Admin" ? (
               <div className="mt-[29.6vh]">&nbsp;</div>
             ) : (
               <div className="mt-[35vh]">&nbsp;</div>
