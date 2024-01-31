@@ -5,12 +5,6 @@ import CreateUser from "./CreateUser.jsx";
 
 function CreateButtonUsers() {
   const [createClicked, setCreateClicked] = useState(false);
-  const [formValues, setFormValues] = useState({
-    sopTitle: "",
-    milestone: "",
-    serviceTag: "",
-    sopDescription: "",
-  });
 
   const handleCreateClick = () => {
     setCreateClicked(true);
@@ -18,24 +12,6 @@ function CreateButtonUsers() {
 
   const handleClose = () => {
     setCreateClicked(false);
-  };
-
-  const handleOverlayClick = () => {
-    handleClose();
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues({
-      ...formValues,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted with values:", formValues);
-    handleClose();
   };
 
   return (

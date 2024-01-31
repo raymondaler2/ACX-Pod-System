@@ -1,25 +1,17 @@
-import {
-  Box,
-  Card,
-  Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-} from "@mui/material";
+import { Box, Card, Grid } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import NavSideBar from "./../components/NavSideBar.jsx";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { useEffect, useState } from "react";
 import SearchFilter from "./../components/SearchFilter.jsx";
 import CreateButtonUsers from "../components/CreateButtonUsers.jsx";
+import EditUser from "./../components/EditUser.jsx";
 import axios from "axios";
 
 const Users = () => {
   const [rows, SetRows] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editClicked, setEditClicked] = useState(false);
 
   const columns = [
     {
@@ -67,6 +59,7 @@ const Users = () => {
 
   const mapUserData = (userData) => {
     return userData.map((user, index) => ({
+      ...user,
       id: index + 1,
       lastName: user.last_name,
       firstName: user.first_name,
@@ -88,13 +81,17 @@ const Users = () => {
     }
   };
 
-  const handleRowClick = (params) => {
-    setSelectedRow(params.row);
-    setIsDialogOpen(true);
+  const handleEditClick = () => {
+    setEditClicked(true);
   };
 
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
+  const handleClose = () => {
+    setEditClicked(false);
+  };
+
+  const handleRowClick = (params) => {
+    setSelectedRow(params.row);
+    handleEditClick();
   };
 
   useEffect(() => {
@@ -146,7 +143,6 @@ const Users = () => {
                 <DataGrid
                   columns={columns}
                   rows={rows}
-                  checkboxSelection
                   onRowClick={handleRowClick}
                   sx={{ border: "none", minHeight: "41.5rem" }}
                   disableRowSelectionOnClick
@@ -156,24 +152,12 @@ const Users = () => {
           </PerfectScrollbar>
         </Box>
       </Grid>
-      <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
-        <DialogTitle>User Details</DialogTitle>
-        <DialogContent>
-          {selectedRow && (
-            <div>
-              <p>Last Name: {selectedRow.lastName}</p>
-              <p>First Name: {selectedRow.firstName}</p>
-              <p>Position: {selectedRow.position}</p>
-              <p>Role: {selectedRow.role}</p>
-              <p>Pod Designation: {selectedRow.podDesignation}</p>
-              <p>Status: {selectedRow.status}</p>
-            </div>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Close</Button>
-        </DialogActions>
-      </Dialog>
+      <EditUser
+        editClicked={editClicked}
+        handleClose={handleClose}
+        handleEditClick={handleEditClick}
+        selectedRow={selectedRow}
+      />
     </Grid>
   );
 };

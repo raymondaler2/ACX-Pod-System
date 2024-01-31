@@ -16,7 +16,7 @@ const userSchema = mongoose.Schema(
       type: String,
     },
     birthday: {
-      type: String,
+      type: {},
     },
     gender: {
       type: String,
@@ -25,7 +25,7 @@ const userSchema = mongoose.Schema(
       type: String,
     },
     contact_number: {
-      type: Number,
+      type: String,
     },
     emergency_contact: {
       type: String,

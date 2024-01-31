@@ -27,13 +27,19 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import {
+  TroubleshootOutlined,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 import UploadIcon from "@mui/icons-material/Upload";
 import ClearIcon from "@mui/icons-material/Clear";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
-const CreateUser = (props) => {
+const EditUser = (props) => {
   const filter = createFilterOptions();
-  const { createClicked, handleClose, handleCreateClick } = props;
+  const { editClicked, handleClose, handleEditClick, selectedRow } = props;
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [address, setAddress] = useState("");
@@ -45,7 +51,7 @@ const CreateUser = (props) => {
   const [emergencyNumber, setEmergencyNumber] = useState("");
   const [relationship, setRelationship] = useState("");
   const [relationshipOptions, setRelationshipOptions] = useState([]);
-  const [createClickedTwo, setCreateClickedTwo] = useState(false);
+  const [editClickedTwo, setEditClickedTwo] = useState(false);
   const [username, setUsername] = useState("");
   const [position, setPosition] = useState("");
   const [positionOptions, setPositionOptions] = useState([]);
@@ -61,6 +67,9 @@ const CreateUser = (props) => {
   const [resumeCvFile, setResumeCvFile] = useState(null);
   const [portfolioFile, setPortfolioFile] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarOpenDeleted, setSnackbarOpenDeleted] = useState(false);
+  const [confirmEdit, setConfirmEdit] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const dateObject = birthday instanceof dayjs ? birthday?.toDate() : null;
 
@@ -139,49 +148,63 @@ const CreateUser = (props) => {
     setEmployeeNumber(e.target.value);
   };
 
-  const clearData = () => {
-    setFirstName("");
-    setLastName("");
-    setAddress("");
-    setBirthday(null);
-    setGender("");
-    setEmail("");
-    setContactNumber("");
-    setEmergencyContact("");
-    setEmergencyNumber("");
-    setRelationship("");
-    setUsername("");
-    setPosition("");
-    setPassword("");
-    setShowPassword(false);
-    setRole("");
-    setEmployeeNumber("ACX-00-000");
-    setphilhealth("");
-    setPagibig("");
-    setTinnumber("");
-    setNbiClearanceFile(null);
-    setResumeCvFile(null);
-    setPortfolioFile(null);
-  };
-
   const handleCancelclick = () => {
-    clearData();
     handleClose();
   };
 
   const handleCancelclickPageTwo = () => {
-    clearData();
-    setCreateClickedTwo(false);
+    setEditClickedTwo(false);
   };
 
   const handleNext = () => {
-    setCreateClickedTwo(true);
+    setEditClickedTwo(true);
     handleClose();
   };
 
-  const handleCreateUser = async () => {
+  const handleConfirmEdit = () => {
+    setConfirmEdit(!confirmEdit);
+  };
+
+  const handleUserDelete = () => {
+    setConfirmDelete(true);
+  };
+
+  const handleOnDelete = async () => {
     const site = import.meta.env.VITE_SITE;
-    const result = await axios.post(`http://${site}:3000/api/user`, {
+    const result = await axios.delete(
+      `http://${site}:3000/api/user/${selectedRow?._id}`
+    );
+
+    if (result.status === 200) {
+      setSnackbarOpenDeleted(true);
+    }
+  };
+
+  const handleEditUser = async () => {
+    const parsedDate = dayjs(selectedRow?.birthday);
+
+    const selectedRowValues = {
+      first_name: selectedRow?.firstName,
+      last_name: selectedRow?.lastName,
+      address: selectedRow?.address,
+      birthday: parsedDate,
+      gender: selectedRow?.gender,
+      email: selectedRow?.email,
+      contact_number: selectedRow?.contact_number,
+      emergency_contact: selectedRow?.emergency_contact,
+      emergency_number: selectedRow?.emergency_number,
+      relationship: selectedRow?.relationship?.relationship,
+      username: selectedRow?.username,
+      position: selectedRow?.position,
+      role: selectedRow?.role,
+      employee_number: selectedRow?.employee_number,
+      philhealth: selectedRow?.philhealth,
+      pagibig: selectedRow?.pagibig,
+      tin_number: selectedRow?.tin_number,
+      pod_designation: "Edda POD",
+    };
+
+    const data = {
       first_name: firstName,
       last_name: lastName,
       address,
@@ -200,11 +223,28 @@ const CreateUser = (props) => {
       philhealth,
       pagibig,
       tin_number: tinnumber,
-      nbi_clearance: nbiClearanceFile,
-      resume_cv: resumeCvFile,
-      portfolio: portfolioFile,
+      // nbi_clearance: nbiClearanceFile,
+      // resume_cv: resumeCvFile,
+      // portfolio: portfolioFile,
       pod_designation: "Edda POD",
+    };
+
+    Object.keys(data).forEach((key) => {
+      if (data[key] === selectedRowValues[key]) {
+        delete data[key];
+      }
     });
+
+    const filteredData = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => value !== "")
+    );
+
+    const site = import.meta.env.VITE_SITE;
+    const result = await axios.put(
+      `http://${site}:3000/api/user/${selectedRow?._id}`,
+      filteredData
+    );
+
     if (result.status === 200) {
       setSnackbarOpen(true);
     }
@@ -274,34 +314,84 @@ const CreateUser = (props) => {
     setRoleOptions(formattedRoles);
   };
 
+  const fetchUserData = () => {
+    const parsedDate = dayjs(selectedRow?.birthday);
+
+    setFirstName(selectedRow?.firstName);
+    setLastName(selectedRow?.lastName);
+    setAddress(selectedRow?.address);
+    setBirthday(parsedDate);
+    setGender(selectedRow?.gender);
+    setEmail(selectedRow?.email);
+    setContactNumber(selectedRow?.contact_number);
+    setEmergencyContact(selectedRow?.emergency_contact);
+    setEmergencyNumber(selectedRow?.emergency_number);
+    setRelationship(selectedRow?.relationship?.relationship);
+    setUsername(selectedRow?.username);
+    setPosition(selectedRow?.position);
+    setRole(selectedRow?.role);
+    setEmployeeNumber(selectedRow?.employee_number);
+    setphilhealth(selectedRow?.philhealth);
+    setPagibig(selectedRow?.pagibig);
+    setTinnumber(selectedRow?.tin_number);
+  };
+
   useEffect(() => {
     fetchRelationships();
     fetchOptions();
     fetchRoles();
   }, []);
 
+  useEffect(() => {
+    if (
+      relationshipOptions.length > 0 &&
+      roleOptions.length > 0 &&
+      positionOptions.length > 0
+    ) {
+      fetchUserData();
+    }
+  }, [selectedRow]);
+
   return (
     <>
       <Dialog
         maxWidth="xl"
-        open={createClicked}
+        open={editClicked}
         PaperProps={{ style: customDialogStyles }}
       >
         <DialogTitle>
           <Grid container>
-            <Grid item xs={11.7}>
+            <Grid item xs={10.9}>
               <Stack direction="row">
-                <p className="font-bold text-[28px] mb-[20px]">Create User</p>
+                <p className="font-bold text-[28px] mb-[20px]">Edit User</p>
               </Stack>
             </Grid>
-            <Grid item xs={0.1}>
-              <IconButton
-                color="black"
-                variant="contained"
-                onClick={handleCancelclick}
-              >
-                <CloseIcon sx={{ color: "black" }} />
-              </IconButton>
+            <Grid item xs={1.1}>
+              <Stack direction="row">
+                <IconButton
+                  color="#f44336"
+                  variant="contained"
+                  onClick={handleUserDelete}
+                >
+                  <DeleteOutlineOutlinedIcon sx={{ color: "#f44336" }} />
+                </IconButton>
+                <IconButton
+                  color="#388e3c"
+                  variant="contained"
+                  onClick={handleConfirmEdit}
+                >
+                  <EditOutlinedIcon
+                    sx={confirmEdit ? { color: "gray" } : { color: "#388e3c" }}
+                  />
+                </IconButton>
+                <IconButton
+                  color="black"
+                  variant="contained"
+                  onClick={handleCancelclick}
+                >
+                  <CloseIcon sx={{ color: "black" }} />
+                </IconButton>
+              </Stack>
             </Grid>
           </Grid>
         </DialogTitle>
@@ -319,6 +409,7 @@ const CreateUser = (props) => {
                   First Name
                 </InputLabel>
                 <TextField
+                  disabled={confirmEdit}
                   fullWidth
                   id="first-name"
                   variant="outlined"
@@ -337,6 +428,7 @@ const CreateUser = (props) => {
                   Address
                 </InputLabel>
                 <TextField
+                  disabled={confirmEdit}
                   fullWidth
                   id="address"
                   variant="outlined"
@@ -355,6 +447,7 @@ const CreateUser = (props) => {
                   Email Address
                 </InputLabel>
                 <TextField
+                  disabled={confirmEdit}
                   fullWidth
                   id="email-address"
                   variant="outlined"
@@ -376,6 +469,7 @@ const CreateUser = (props) => {
                   Last Name
                 </InputLabel>
                 <TextField
+                  disabled={confirmEdit}
                   fullWidth
                   id="last-name"
                   variant="outlined"
@@ -402,9 +496,10 @@ const CreateUser = (props) => {
                           fullWidth
                         >
                           <DatePicker
+                            disabled={confirmEdit}
                             label="MM/DD/YYYY"
                             fullWidth
-                            value={birthday}
+                            value={birthday ?? null}
                             slotProps={{
                               field: { clearable: true },
                             }}
@@ -430,6 +525,7 @@ const CreateUser = (props) => {
                         <FormControl fullWidth variant="outlined">
                           <InputLabel id="gender-label">Gender</InputLabel>
                           <Select
+                            disabled={confirmEdit}
                             abelId="gender-label"
                             id="gender"
                             value={gender}
@@ -455,6 +551,7 @@ const CreateUser = (props) => {
                   Contact Number
                 </InputLabel>
                 <TextField
+                  disabled={confirmEdit}
                   fullWidth
                   id="contact-number"
                   variant="outlined"
@@ -481,6 +578,7 @@ const CreateUser = (props) => {
                 Emergency Contact
               </InputLabel>
               <TextField
+                disabled={confirmEdit}
                 fullWidth
                 id="first-name"
                 variant="outlined"
@@ -500,6 +598,7 @@ const CreateUser = (props) => {
                 Contact Number
               </InputLabel>
               <TextField
+                disabled={confirmEdit}
                 fullWidth
                 id="emergency-number"
                 variant="outlined"
@@ -519,6 +618,7 @@ const CreateUser = (props) => {
                 Relationship
               </InputLabel>
               <Autocomplete
+                disabled={confirmEdit}
                 selectOnFocus
                 clearOnBlur
                 handleHomeEndKeys
@@ -594,28 +694,63 @@ const CreateUser = (props) => {
           >
             Next
           </Button>
+          <Button
+            disabled={confirmEdit}
+            onClick={handleEditUser}
+            variant="contained"
+            color="success"
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              paddingRight: "40px",
+              paddingLeft: "40px",
+              paddingTop: "5px",
+              paddingBottom: "5px",
+              marginLeft: "15px",
+            }}
+          >
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
       <Dialog
         maxWidth="xl"
-        open={createClickedTwo}
+        open={editClickedTwo}
         PaperProps={{ style: customDialogStyles }}
       >
         <DialogTitle>
           <Grid container>
-            <Grid item xs={11.7}>
+            <Grid item xs={11}>
               <Stack direction="row">
-                <p className="font-bold text-[28px] mb-[20px]">Create User</p>
+                <p className="font-bold text-[28px] mb-[20px]">Edit User</p>
               </Stack>
             </Grid>
-            <Grid item xs={0.1}>
-              <IconButton
-                color="black"
-                variant="contained"
-                onClick={handleCancelclickPageTwo}
-              >
-                <CloseIcon sx={{ color: "black" }} />
-              </IconButton>
+            <Grid item xs={1}>
+              <Stack direction="row">
+                <IconButton
+                  color="#f44336"
+                  variant="contained"
+                  onClick={handleUserDelete}
+                >
+                  <DeleteOutlineOutlinedIcon sx={{ color: "#f44336" }} />
+                </IconButton>
+                <IconButton
+                  color="#388e3c"
+                  variant="contained"
+                  onClick={handleConfirmEdit}
+                >
+                  <EditOutlinedIcon
+                    sx={confirmEdit ? { color: "gray" } : { color: "#388e3c" }}
+                  />
+                </IconButton>
+                <IconButton
+                  color="black"
+                  variant="contained"
+                  onClick={handleCancelclickPageTwo}
+                >
+                  <CloseIcon sx={{ color: "black" }} />
+                </IconButton>
+              </Stack>
             </Grid>
           </Grid>
         </DialogTitle>
@@ -650,7 +785,6 @@ const CreateUser = (props) => {
                 paddingTop: "20px",
                 paddingBottom: "20px",
                 paddingLeft: "60px",
-                paddingRight: "60px",
               }}
             >
               <Grid container spacing={2}>
@@ -666,6 +800,7 @@ const CreateUser = (props) => {
                       Username
                     </InputLabel>
                     <TextField
+                      disabled={confirmEdit}
                       fullWidth
                       id="user-name"
                       variant="outlined"
@@ -684,6 +819,7 @@ const CreateUser = (props) => {
                       Password
                     </InputLabel>
                     <TextField
+                      disabled={confirmEdit}
                       id="password"
                       label="Password"
                       variant="outlined"
@@ -709,6 +845,7 @@ const CreateUser = (props) => {
                       }}
                     />
                     <Button
+                      disabled={confirmEdit}
                       sx={{
                         alignSelf: "flex-start",
                         marginTop: "35px",
@@ -739,6 +876,7 @@ const CreateUser = (props) => {
                       Position
                     </InputLabel>
                     <Autocomplete
+                      disabled={confirmEdit}
                       selectOnFocus
                       clearOnBlur
                       handleHomeEndKeys
@@ -796,6 +934,7 @@ const CreateUser = (props) => {
                       Role
                     </InputLabel>
                     <Autocomplete
+                      disabled={confirmEdit}
                       selectOnFocus
                       clearOnBlur
                       handleHomeEndKeys
@@ -861,6 +1000,7 @@ const CreateUser = (props) => {
                         Employee Number
                       </InputLabel>
                       <TextField
+                        disabled={confirmEdit}
                         fullWidth
                         id="employee-number"
                         variant="outlined"
@@ -891,6 +1031,7 @@ const CreateUser = (props) => {
                       Philhealth
                     </InputLabel>
                     <TextField
+                      disabled={confirmEdit}
                       fullWidth
                       id="philhealth"
                       variant="outlined"
@@ -909,6 +1050,7 @@ const CreateUser = (props) => {
                       PAG-IBIG
                     </InputLabel>
                     <TextField
+                      disabled={confirmEdit}
                       fullWidth
                       id="pag-ibig"
                       variant="outlined"
@@ -927,6 +1069,7 @@ const CreateUser = (props) => {
                       Tin Number
                     </InputLabel>
                     <TextField
+                      disabled={confirmEdit}
                       fullWidth
                       id="tin-number"
                       variant="outlined"
@@ -947,6 +1090,7 @@ const CreateUser = (props) => {
                     {nbiClearanceFile === null ? (
                       <>
                         <Input
+                          disabled={confirmEdit}
                           type="file"
                           id="nbi-clearance"
                           sx={{ display: "none" }}
@@ -956,6 +1100,7 @@ const CreateUser = (props) => {
                         />
                         <label htmlFor="nbi-clearance">
                           <Button
+                            disabled={confirmEdit}
                             variant="outlined"
                             component="span"
                             startIcon={<UploadIcon />}
@@ -969,6 +1114,7 @@ const CreateUser = (props) => {
                       <>
                         <label htmlFor="nbi-clearance-cancel">
                           <Button
+                            disabled={confirmEdit}
                             color="error"
                             variant="contained"
                             component="span"
@@ -996,6 +1142,7 @@ const CreateUser = (props) => {
                     {resumeCvFile === null ? (
                       <>
                         <Input
+                          disabled={confirmEdit}
                           type="file"
                           id="resume-cv"
                           sx={{ display: "none" }}
@@ -1005,6 +1152,7 @@ const CreateUser = (props) => {
                         />
                         <label htmlFor="resume-cv">
                           <Button
+                            disabled={confirmEdit}
                             variant="outlined"
                             component="span"
                             startIcon={<UploadIcon />}
@@ -1018,6 +1166,7 @@ const CreateUser = (props) => {
                       <>
                         <label htmlFor="resume-cv-cancel">
                           <Button
+                            disabled={confirmEdit}
                             color="error"
                             variant="contained"
                             component="span"
@@ -1045,6 +1194,7 @@ const CreateUser = (props) => {
                     {portfolioFile === null ? (
                       <>
                         <Input
+                          disabled={confirmEdit}
                           type="file"
                           id="portfolio"
                           sx={{ display: "none" }}
@@ -1054,6 +1204,7 @@ const CreateUser = (props) => {
                         />
                         <label htmlFor="portfolio">
                           <Button
+                            disabled={confirmEdit}
                             variant="outlined"
                             component="span"
                             startIcon={<UploadIcon />}
@@ -1067,6 +1218,7 @@ const CreateUser = (props) => {
                       <>
                         <label htmlFor="portfolio-cancel">
                           <Button
+                            disabled={confirmEdit}
                             color="error"
                             variant="contained"
                             component="span"
@@ -1091,13 +1243,13 @@ const CreateUser = (props) => {
           sx={{
             justifyContent: "flex-end",
             marginBottom: "20px",
-            marginRight: "1rem",
+            marginRight: "1.5rem",
           }}
         >
           <Button
             onClick={() => {
-              handleCreateClick();
-              setCreateClickedTwo(false);
+              handleEditClick();
+              setEditClickedTwo(false);
             }}
             variant="contained"
             sx={{
@@ -1117,7 +1269,8 @@ const CreateUser = (props) => {
             Back
           </Button>
           <Button
-            onClick={handleCreateUser}
+            disabled={confirmEdit}
+            onClick={handleEditUser}
             variant="contained"
             color="success"
             sx={{
@@ -1134,13 +1287,67 @@ const CreateUser = (props) => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog
+        open={confirmDelete}
+        PaperProps={{
+          style: {
+            minWidth: "50rem",
+            borderRadius: "40px",
+            padding: "20px",
+          },
+        }}
+      >
+        <DialogTitle>
+          <p className="font-bold text-[28px] mb-[20px]">Confirmation</p>
+        </DialogTitle>
+        <DialogContent>
+          <p className="mt-[5px] mb-[5px]">
+            Are you sure you want to delete this user?
+          </p>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setConfirmDelete(false);
+            }}
+            variant="contained"
+            color="success"
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              paddingRight: "40px",
+              paddingLeft: "40px",
+              paddingTop: "5px",
+              paddingBottom: "5px",
+              marginLeft: "15px",
+            }}
+          >
+            No
+          </Button>
+          <Button
+            onClick={handleOnDelete}
+            variant="contained"
+            color="error"
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              paddingRight: "30px",
+              paddingLeft: "30px",
+              paddingTop: "5px",
+              paddingBottom: "5px",
+              marginLeft: "15px",
+            }}
+          >
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={1000}
         onClose={() => {
           setSnackbarOpen(false);
-          clearData();
-          setCreateClickedTwo(false);
+          setEditClickedTwo(false);
           window.location.reload();
         }}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
@@ -1156,11 +1363,36 @@ const CreateUser = (props) => {
           }}
           severity="success"
         >
-          User Created
+          User Edited
+        </MuiAlert>
+      </Snackbar>
+      <Snackbar
+        open={snackbarOpenDeleted}
+        autoHideDuration={1000}
+        onClose={() => {
+          setSnackbarOpenDeleted(false);
+          setConfirmDelete(false);
+          setEditClickedTwo(false);
+          window.location.reload();
+        }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{
+          marginTop: "5rem",
+        }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          onClose={() => {
+            setSnackbarOpenDeleted(false);
+          }}
+          severity="success"
+        >
+          User Deleted
         </MuiAlert>
       </Snackbar>
     </>
   );
 };
 
-export default CreateUser;
+export default EditUser;

@@ -58,7 +58,8 @@ const getAllUser = asyncHandler(async (req, res) => {
   try {
     const users = await User.find({ username: { $ne: "acx_super_admin" } })
       .populate("position", "position")
-      .populate("role", "role");
+      .populate("role", "role")
+      .populate("relationship", "relationship");
 
     res.status(200).json(users);
   } catch (error) {
@@ -118,10 +119,65 @@ const getUserById = asyncHandler(async (req, res) => {
   }
 });
 
+const updateUserById = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { position, role, relationship, ...userData } = req.body;
+
+    let existingPosition, existingUserRole, existingRelationship;
+
+    if (position) {
+      existingPosition = await UserPosition.findOneAndUpdate(
+        { position },
+        { position },
+        { upsert: true, new: true }
+      );
+    }
+
+    if (role) {
+      existingUserRole = await UserRole.findOneAndUpdate(
+        { role },
+        { role },
+        { upsert: true, new: true }
+      );
+    }
+
+    if (relationship) {
+      existingRelationship = await UserRelationship.findOneAndUpdate(
+        { relationship },
+        { relationship },
+        { upsert: true, new: true }
+      );
+    }
+
+    const updateFields = {
+      ...userData,
+      ...(existingPosition && { position: existingPosition._id }),
+      ...(existingUserRole && { role: existingUserRole._id }),
+      ...(existingRelationship && { relationship: existingRelationship._id }),
+    };
+
+    const updatedUser = await User.findByIdAndUpdate(id, updateFields, {
+      new: true,
+    });
+
+    if (!updatedUser) {
+      res.status(404).json(`Update User ERROR: User with ID ${id} not found`);
+      console.error(`Update User ERROR: User with ID ${id} not found`);
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(500).json(`Update User ERROR: ${error}`);
+    console.error(`Update User ERROR: ${error}`);
+  }
+});
+
 module.exports = {
   getUserById,
   getAllUser,
   addUser,
   deleteUser,
   loginUser,
+  updateUserById,
 };

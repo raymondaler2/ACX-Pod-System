@@ -1,7 +1,6 @@
 import {
   Card,
   Button,
-  ThemeProvider,
   Grid,
   Box,
   ListItemButton,
@@ -11,7 +10,14 @@ import {
   Chip,
   IconButton,
   Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Snackbar,
+  Alert as MuiAlert,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import ArrowBackIosNewOutlinedIcon from "@mui/icons-material/ArrowBackIosNewOutlined";
 import { Link } from "react-router-dom";
 import { Str } from "@supercharge/strings";
@@ -24,10 +30,14 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import EditSop from "./EditSop.jsx";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
 import StarOutlinedIcon from "@mui/icons-material/StarOutlined";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 
 const SopCardBig = (props) => {
+  const navigate = useNavigate();
   const { data } = props;
   const { milestones } = data;
+  const [snackbarOpenDeleted, setSnackbarOpenDeleted] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [editClicked, setEditClicked] = useState(false);
   const [publisher, SetPublisher] = useState("");
   const dateObjectPublished = new Date(data?.createdAt);
@@ -55,8 +65,23 @@ const SopCardBig = (props) => {
     setEditClicked(true);
   };
 
+  const handleConfirmDelete = () => {
+    setConfirmDelete(!confirmDelete);
+  };
+
   const handleClose = () => {
     setEditClicked(false);
+  };
+
+  const handleOnDelete = async () => {
+    const site = import.meta.env.VITE_SITE;
+    const result = await axios.delete(
+      `http://${site}:4000/api/sop/${data?._id}`
+    );
+
+    if (result.status === 200) {
+      setSnackbarOpenDeleted(true);
+    }
   };
 
   const publisherName = async () => {
@@ -82,23 +107,41 @@ const SopCardBig = (props) => {
       <Box
         sx={{
           margin: "45px",
+          marginRight: "0px",
           maxHeight: "100%",
           overflowY: "auto",
+          overflowX: "hidden",
         }}
       >
-        <Button
-          startIcon={<ArrowBackIosNewOutlinedIcon />}
-          variant="text"
-          sx={{
-            textTransform: "none",
-            color: "black",
-          }}
-        >
-          <Link to={`/Knowledgebase`}>Back to Knowledgebase</Link>
-        </Button>
-        <IconButton sx={{ marginLeft: "56rem" }} onClick={handleEditClick}>
-          <EditOutlinedIcon sx={{ color: "black" }} />
-        </IconButton>
+        <Stack direction="row">
+          <Button
+            startIcon={<ArrowBackIosNewOutlinedIcon />}
+            variant="text"
+            sx={{
+              minWidth: "13rem",
+              maxHeight: "40px",
+              textTransform: "none",
+              color: "black",
+              marginRight: "53.9rem",
+            }}
+          >
+            <Link to={`/Knowledgebase`}>Back to Knowledgebase</Link>
+          </Button>
+          <IconButton
+            color="#f44336"
+            variant="contained"
+            onClick={handleConfirmDelete}
+          >
+            <DeleteOutlineOutlinedIcon sx={{ color: "#f44336" }} />
+          </IconButton>
+          <IconButton
+            color="#388e3c"
+            variant="contained"
+            onClick={handleEditClick}
+          >
+            <EditOutlinedIcon sx={{ color: "#388e3c" }} />
+          </IconButton>
+        </Stack>
         <PerfectScrollbar
           style={{
             maxHeight: "82vh",
@@ -173,6 +216,7 @@ const SopCardBig = (props) => {
             <Grid item xs={4}>
               <Box
                 sx={{
+                  marginRight: "45px",
                   paddingLeft: "50px",
                   paddingRight: "0px",
                 }}
@@ -251,6 +295,84 @@ const SopCardBig = (props) => {
         handleEditClick={handleEditClick}
         data={data}
       />
+      <Dialog
+        open={confirmDelete}
+        PaperProps={{
+          style: {
+            minWidth: "50rem",
+            borderRadius: "40px",
+            padding: "20px",
+          },
+        }}
+      >
+        <DialogTitle>
+          <p className="font-bold text-[28px] mb-[20px]">Confirmation</p>
+        </DialogTitle>
+        <DialogContent>
+          <p className="mt-[5px] mb-[5px]">
+            Are you sure you want to delete this user?
+          </p>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setConfirmDelete(false);
+            }}
+            variant="contained"
+            color="success"
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              paddingRight: "40px",
+              paddingLeft: "40px",
+              paddingTop: "5px",
+              paddingBottom: "5px",
+              marginLeft: "15px",
+            }}
+          >
+            No
+          </Button>
+          <Button
+            onClick={handleOnDelete}
+            variant="contained"
+            color="error"
+            sx={{
+              textTransform: "none",
+              borderRadius: "10px",
+              paddingRight: "30px",
+              paddingLeft: "30px",
+              paddingTop: "5px",
+              paddingBottom: "5px",
+              marginLeft: "15px",
+            }}
+          >
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackbarOpenDeleted}
+        autoHideDuration={1000}
+        onClose={() => {
+          setSnackbarOpenDeleted(false);
+          navigate("/Knowledgebase");
+        }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{
+          marginTop: "5rem",
+        }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          onClose={() => {
+            setSnackbarOpenDeleted(false);
+          }}
+          severity="success"
+        >
+          Sop Deleted
+        </MuiAlert>
+      </Snackbar>
     </Card>
   );
 };
