@@ -8,8 +8,24 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import SupportOutlinedIcon from "@mui/icons-material/SupportOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const NavSideBar = () => {
+  const [userData, setUserData] = useState(null);
+  const user_id = localStorage.getItem("_id");
+
+  const fetchUser = async () => {
+    const site = import.meta.env.VITE_SITE;
+    const response = await axios.get(`http://${site}:3000/api/user/${user_id}`);
+    setUserData(response.data);
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
   return (
     <Paper
       elevation={3}
@@ -103,7 +119,32 @@ const NavSideBar = () => {
                 </span>
               </Button>
             </Stack>
-            <div className="mt-[35vh]">&nbsp;</div>
+            {userData?.role.role === "Admin" ||
+            userData?.username === "acx_super_admin" ? (
+              <Stack direction="row" width="100%" pt={1} pb={1}>
+                <Button
+                  component={Link}
+                  to="/Users"
+                  sx={{ textTransform: "none", color: "black" }}
+                >
+                  <AccountCircleOutlinedIcon />
+                  <span
+                    className="font-bold ml-[20px] text-base"
+                    style={{ color: "black", textDecoration: "none" }}
+                  >
+                    Users
+                  </span>
+                </Button>
+              </Stack>
+            ) : (
+              <></>
+            )}
+            {userData?.role.role === "Admin" ||
+            userData?.username === "acx_super_admin" ? (
+              <div className="mt-[29.6vh]">&nbsp;</div>
+            ) : (
+              <div className="mt-[35vh]">&nbsp;</div>
+            )}
             <Stack direction="row" width="100%" pt={1} pb={1}>
               <Button
                 component={Link}

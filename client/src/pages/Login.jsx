@@ -21,10 +21,10 @@ import CryptoJS from "crypto-js";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [username, setusername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [emailError, setEmailError] = useState(false);
+  const [usernameError, setusernameError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -42,11 +42,11 @@ const Login = () => {
     return bytes.toString(CryptoJS.enc.Utf8);
   };
 
-  const LoginUser = async (email, password) => {
+  const LoginUser = async (username, password) => {
     try {
       const site = import.meta.env.VITE_SITE;
       const login = await axios.post(`http://${site}:3000/api/user/login`, {
-        work_email: email,
+        username,
         password: password,
       });
 
@@ -56,7 +56,7 @@ const Login = () => {
       localStorage.setItem("token", token);
 
       handleSnackbar(true, "success", "Login Successful");
-      saveCredentialsToLocalStorage(email, password);
+      saveCredentialsToLocalStorage(username, password);
       return true;
     } catch (error) {
       console.error(`LoginUser ERROR: ${error}`);
@@ -69,38 +69,38 @@ const Login = () => {
     setRememberMe((prev) => !prev);
   };
 
-  const saveCredentialsToLocalStorage = (email, password) => {
+  const saveCredentialsToLocalStorage = (username, password) => {
     if (rememberMe) {
-      const encryptedEmail = encrypt(email);
+      const encryptedusername = encrypt(username);
       const encryptedPassword = encrypt(password);
-      localStorage.setItem("rememberedEmail", encryptedEmail);
+      localStorage.setItem("rememberedUsername", encryptedusername);
       localStorage.setItem("rememberedPassword", encryptedPassword);
       localStorage.setItem("rememberUser", rememberMe);
     } else {
-      localStorage.removeItem("rememberedEmail");
+      localStorage.removeItem("rememberedUsername");
       localStorage.removeItem("rememberedPassword");
     }
   };
 
   const getRememberedCredentialsFromLocalStorage = () => {
-    const rememberedEmail = localStorage.getItem("rememberedEmail");
+    const rememberedUsername = localStorage.getItem("rememberedUsername");
     const rememberedPassword = localStorage.getItem("rememberedPassword");
     const rememberUser = localStorage.getItem("rememberUser");
 
-    if (rememberedEmail && rememberedPassword) {
-      const decryptedEmail = decrypt(rememberedEmail);
+    if (rememberedUsername && rememberedPassword) {
+      const decryptedusername = decrypt(rememberedUsername);
       const decryptedPassword = decrypt(rememberedPassword);
       setRememberMe(Boolean(rememberUser));
-      setEmail(decryptedEmail);
+      setusername(decryptedusername);
       setPassword(decryptedPassword);
     }
   };
 
   const handleLogin = async () => {
-    if (!email) {
-      setEmailError(true);
+    if (!username) {
+      setusernameError(true);
     } else {
-      setEmailError(false);
+      setusernameError(false);
     }
 
     if (!password) {
@@ -109,8 +109,8 @@ const Login = () => {
       setPasswordError(false);
     }
 
-    if (email && password) {
-      const result = await LoginUser(email, password);
+    if (username && password) {
+      const result = await LoginUser(username, password);
     }
   };
 
@@ -145,17 +145,17 @@ const Login = () => {
           </p>
         </div>
         <TextField
-          label="Email"
+          label="Username"
           variant="outlined"
-          value={email}
+          value={username}
           onChange={(e) => {
-            setEmail(e.target.value);
-            setEmailError(false);
+            setusername(e.target.value);
+            setusernameError(false);
             setPasswordError(false);
           }}
           className="w-full"
-          error={emailError}
-          helperText={emailError ? "Email cannot be empty" : ""}
+          error={usernameError}
+          helperText={usernameError ? "username cannot be empty" : ""}
           sx={{
             width: "350px",
             marginBottom: "1rem",
@@ -168,7 +168,7 @@ const Login = () => {
           value={password}
           onChange={(e) => {
             setPassword(e.target.value);
-            setEmailError(false);
+            setusernameError(false);
             setPasswordError(false);
           }}
           error={passwordError}

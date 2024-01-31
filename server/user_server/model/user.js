@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const UserRole = require("./userRole");
 const UserPosition = require("./userPosition");
+const UserRelationship = require("./userRelationship");
 
 const userSchema = mongoose.Schema(
   {
@@ -11,42 +12,61 @@ const userSchema = mongoose.Schema(
     last_name: {
       type: String,
     },
+    address: {
+      type: String,
+    },
     birthday: {
+      type: {},
+    },
+    gender: {
       type: String,
     },
     email: {
       type: String,
     },
     contact_number: {
-      type: Number,
+      type: String,
     },
     emergency_contact: {
       type: String,
     },
-    relationship: {
+    emergency_number: {
       type: String,
     },
-    emergency_number: {
-      type: Number,
+    relationship: {
+      type: String,
+      ref: UserRelationship,
     },
     username: {
       type: String,
       required: [true, "Please enter Username"],
     },
-    password: {
-      type: String,
-      required: [true, "Please enter Password"],
-    },
     position: {
       type: String,
       ref: UserPosition,
     },
-    pod_designation: {
+    password: {
       type: String,
+      required: [true, "Please enter Password"],
     },
     role: {
       type: String,
       ref: UserRole,
+    },
+    employee_number: {
+      type: String,
+    },
+    philhealth: {
+      type: String,
+    },
+    pagibig: {
+      type: String,
+    },
+    tin_number: {
+      type: String,
+    },
+    pod_designation: {
+      type: String,
     },
   },
   {

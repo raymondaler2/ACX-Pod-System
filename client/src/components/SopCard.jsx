@@ -111,7 +111,7 @@ const SopCard = (props) => {
                     width: "fit-content",
                   }}
                 >
-                  <p className="text-[9px] mr-2">{`${userData.work_email}`}</p>
+                  <p className="text-[9px] mr-2">{`${userData?.work_email}`}</p>
                   <Divider orientation="vertical" variant="middle" flexItem />
                   <p className="text-[9px]">|</p>
                   <p className="text-[9px] ml-2">{formattedDate}</p>

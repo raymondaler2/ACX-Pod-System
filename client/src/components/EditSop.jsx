@@ -21,7 +21,7 @@ import axios from "axios";
 import { createFilterOptions } from "@mui/material/Autocomplete";
 import Textarea from "@mui/joy/Textarea";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import StarBorderOutlinedIcon from "@mui/icons-material/StarBorderOutlined";
@@ -386,7 +386,7 @@ const EditSop = (props) => {
                           handleMilestoneChange(index, e.target.value)
                         }
                       />
-                      <DeleteIcon
+                      <DeleteOutlineOutlinedIcon
                         color="error"
                         onClick={() => handleRemoveMilestone(index)}
                         className="cursor-pointer ml-2"
@@ -411,9 +411,9 @@ const EditSop = (props) => {
                 paddingTop: "5px",
                 paddingBottom: "5px",
                 marginLeft: "15px",
-                backgroundColor: "#B3B3B3",
+                backgroundColor: "#17A1FA",
                 "&:hover": {
-                  backgroundColor: "#B3B3B3",
+                  backgroundColor: "#17A1FA",
                 },
               }}
             >
@@ -422,6 +422,7 @@ const EditSop = (props) => {
             <Button
               onClick={handleSave}
               variant="contained"
+              color="success"
               sx={{
                 textTransform: "none",
                 borderRadius: "10px",
@@ -430,10 +431,6 @@ const EditSop = (props) => {
                 paddingTop: "5px",
                 paddingBottom: "5px",
                 marginLeft: "15px",
-                backgroundColor: "#17A1FA",
-                "&:hover": {
-                  backgroundColor: "#17A1FA",
-                },
               }}
             >
               Save
@@ -486,6 +483,7 @@ const EditSop = (props) => {
             <Stack
               sx={{
                 maxWidth: "30rem",
+                minWidth: "30rem",
                 paddingTop: "20px",
                 paddingBottom: "20px",
                 paddingLeft: "0px",
@@ -542,7 +540,7 @@ const EditSop = (props) => {
                     >
                       {milestone.title}
                     </Button>
-                    <DeleteIcon
+                    <DeleteOutlineOutlinedIcon
                       color="error"
                       onClick={() => handleRemoveMilestone(index)}
                       className="cursor-pointer mt-1 ml-5"
@@ -636,7 +634,7 @@ const EditSop = (props) => {
                               ),
                             }}
                           />
-                          <DeleteIcon
+                          <DeleteOutlineOutlinedIcon
                             color="error"
                             onClick={() =>
                               handleRemoveChecklist(activeMilestone, index)
@@ -669,9 +667,9 @@ const EditSop = (props) => {
               paddingTop: "5px",
               paddingBottom: "5px",
               marginLeft: "15px",
-              backgroundColor: "#B3B3B3",
+              backgroundColor: "#17A1FA",
               "&:hover": {
-                backgroundColor: "#B3B3B3",
+                backgroundColor: "#17A1FA",
               },
             }}
           >
@@ -680,6 +678,7 @@ const EditSop = (props) => {
           <Button
             onClick={handleSave}
             variant="contained"
+            color="success"
             sx={{
               textTransform: "none",
               borderRadius: "10px",
@@ -688,10 +687,6 @@ const EditSop = (props) => {
               paddingTop: "5px",
               paddingBottom: "5px",
               marginLeft: "15px",
-              backgroundColor: "#17A1FA",
-              "&:hover": {
-                backgroundColor: "#17A1FA",
-              },
             }}
           >
             Save
@@ -718,7 +713,7 @@ const EditSop = (props) => {
           }}
           severity="success"
         >
-          SOP Sucessfully Edited
+          SOP Edited
         </MuiAlert>
       </Snackbar>
     </>

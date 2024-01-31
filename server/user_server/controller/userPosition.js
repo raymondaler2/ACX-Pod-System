@@ -7,7 +7,7 @@ const getUserPosition = asyncHandler(async (req, res) => {
     res.status(200).json(Positions);
   } catch (error) {
     res.status(500).json(`Get All User Positions ERROR: ${error}`);
-    console.error(`Get All Use Positions ERROR: ${error}`);
+    console.error(`Get All User Positions ERROR: ${error}`);
   }
 });
 

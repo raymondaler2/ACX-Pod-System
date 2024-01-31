@@ -469,6 +469,7 @@ const CreateSop = (props) => {
             <Stack
               sx={{
                 maxWidth: "30rem",
+                minWidth: "30rem",
                 paddingTop: "20px",
                 paddingBottom: "20px",
                 paddingLeft: "0px",
@@ -652,9 +653,9 @@ const CreateSop = (props) => {
               paddingTop: "5px",
               paddingBottom: "5px",
               marginLeft: "15px",
-              backgroundColor: "#B3B3B3",
+              backgroundColor: "#17A1FA",
               "&:hover": {
-                backgroundColor: "#B3B3B3",
+                backgroundColor: "#17A1FA",
               },
             }}
           >
@@ -663,6 +664,7 @@ const CreateSop = (props) => {
           <Button
             onClick={handleSave}
             variant="contained"
+            color="success"
             sx={{
               textTransform: "none",
               borderRadius: "10px",
@@ -671,10 +673,6 @@ const CreateSop = (props) => {
               paddingTop: "5px",
               paddingBottom: "5px",
               marginLeft: "15px",
-              backgroundColor: "#17A1FA",
-              "&:hover": {
-                backgroundColor: "#17A1FA",
-              },
             }}
           >
             Save
@@ -686,6 +684,7 @@ const CreateSop = (props) => {
         autoHideDuration={1000}
         onClose={() => {
           setSnackbarOpen(false);
+          window.location.reload();
         }}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         sx={{
@@ -700,7 +699,7 @@ const CreateSop = (props) => {
           }}
           severity="success"
         >
-          SOP Added to Knowledgebase
+          SOP Created
         </MuiAlert>
       </Snackbar>
     </>

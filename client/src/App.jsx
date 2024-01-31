@@ -5,7 +5,6 @@ import Knowledgebase from "./pages/Knowledgebase.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import { useEffect, useState } from "react";
 import KnowledgebaseSOP from "./components/KnowledgebaseSOP.jsx";
-import CreateUser from "./pages/CreateUser.jsx";
 import Users from "./pages/Users.jsx";
 import axios from "axios";
 
@@ -26,7 +25,6 @@ const App = () => {
     <>
       <Routes>
         <Route path="/Users" element={<Users />} />
-        <Route path="/CreateUser" element={<CreateUser />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/" element={<Home />} />
         <Route path="/Knowledgebase" element={<Knowledgebase />} />
