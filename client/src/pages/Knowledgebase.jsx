@@ -6,6 +6,7 @@ import BreakNotifUser from "./../components/BreakNotifUser.jsx";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import SopCard from "./../components/SopCard.jsx";
 import { useEffect, useState } from "react";
+import Footer from "./../components/Footer.jsx";
 import axios from "axios";
 
 const Knowledgebase = () => {
@@ -20,6 +21,9 @@ const Knowledgebase = () => {
   useEffect(() => {
     fetchSopData();
   }, []);
+
+  const hasFeaturedSop = sopData.some((sop) => sop.featured);
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={1.9}>
@@ -30,7 +34,7 @@ const Knowledgebase = () => {
           sx={{
             marginTop: "40px",
             marginBottom: "30px",
-            marginLeft: "50px",
+            marginLeft: "2rem",
           }}
         >
           <Grid container spacing={2}>
@@ -41,60 +45,54 @@ const Knowledgebase = () => {
               <SearchbarWide />
             </Grid>
             <Grid item xs={3} container justifyContent="flex-end">
-              <BreakNotifUser />
+              <Box sx={{ marginRight: "30px" }}>
+                <BreakNotifUser />
+              </Box>
             </Grid>
           </Grid>
         </Box>
         <Box>
-          <PerfectScrollbar
-            style={{
-              marginRight: "20px",
-            }}
-          >
+          <PerfectScrollbar>
             <Box
               sx={{
                 minHeight: "47rem",
                 marginLeft: "2rem",
               }}
             >
-              <p className="font-bold text-[20px] mb-[20px]">Featured SOP</p>
-              {sopData?.length === 0 ? (
-                <Grid
-                  container
-                  spacing={0}
-                  direction="column"
-                  alignItems="center"
-                  justifyContent="center"
-                  sx={{ minHeight: "50vh" }}
-                >
-                  <Grid item xs={3}>
-                    <h1 className="text-center">No Results</h1>
-                  </Grid>
-                </Grid>
-              ) : (
-                <Grid
-                  container
-                  rowSpacing={3}
-                  columnSpacing={0}
-                  sx={{ maxHeight: "50vh" }}
-                >
-                  {sopData.map((sop) => {
-                    if (sop.featured) {
-                      return <SopCard sop={sop} />;
-                    }
-                  })}
+              {hasFeaturedSop && (
+                <p className="font-bold text-[20px] mb-[20px]">Featured SOP</p>
+              )}
+              <Grid
+                container
+                rowSpacing={3}
+                columnSpacing={0}
+                sx={{ maxHeight: "50vh" }}
+              >
+                {sopData.map((sop) => {
+                  if (sop.featured) {
+                    return <SopCard sop={sop} />;
+                  }
+                })}
+                {hasFeaturedSop && (
                   <Grid item xs={12}>
                     <Divider variant="middle" />
                   </Grid>
-                  {sopData.map((sop) => {
-                    if (!sop.featured) {
-                      return <SopCard sop={sop} />;
-                    }
-                  })}
-                </Grid>
-              )}
+                )}
+                {sopData.map((sop) => {
+                  if (!sop.featured) {
+                    return <SopCard sop={sop} />;
+                  }
+                })}
+              </Grid>
             </Box>
           </PerfectScrollbar>
+        </Box>
+        <Box
+          sx={{
+            marginLeft: "2rem",
+          }}
+        >
+          <Footer />
         </Box>
       </Grid>
     </Grid>

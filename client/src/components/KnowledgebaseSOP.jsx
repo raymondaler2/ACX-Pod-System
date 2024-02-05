@@ -1,8 +1,9 @@
-import { Grid, CircularProgress } from "@mui/material";
+import { Grid, Box } from "@mui/material";
 import SopCardBig from "./SopCardBig.jsx";
 import SopCommentsActLog from "./SopCommentsActLog.jsx";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Footer from "./../components/Footer.jsx";
 
 const KnowledgebaseSOP = (props) => {
   const { id } = props;
@@ -27,6 +28,15 @@ const KnowledgebaseSOP = (props) => {
           </Grid>
           <Grid item xs={4}>
             <SopCommentsActLog data={data} />
+          </Grid>
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                marginLeft: "2rem",
+              }}
+            >
+              <Footer />
+            </Box>
           </Grid>
         </Grid>
       )}

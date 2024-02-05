@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import SearchFilter from "./../components/SearchFilter.jsx";
 import CreateButtonUsers from "../components/CreateButtonUsers.jsx";
 import EditUser from "./../components/EditUser.jsx";
+import BreakNotifUser from "./../components/BreakNotifUser.jsx";
+import Footer from "./../components/Footer.jsx";
 import axios from "axios";
 
 const Users = () => {
@@ -112,26 +114,37 @@ const Users = () => {
             marginLeft: "50px",
           }}
         >
-          <p className="text-5xl font-bold mb-4">Users</p>
+          <Grid container sx={{ marginBottom: "10px" }}>
+            <Grid item xs={9} justifyContent="flex-start">
+              <p className="text-5xl font-bold mb-4">Users</p>
+            </Grid>
+            <Grid item xs={3} container justifyContent="flex-end">
+              <Box sx={{ marginRight: "30px" }}>
+                <BreakNotifUser />
+              </Box>
+            </Grid>
+          </Grid>
           <Grid container spacing={2}>
             <Grid item xs={1.5}>
               <CreateButtonUsers />
             </Grid>
             <Grid item xs={7.5}></Grid>
             <Grid item xs={3} container justifyContent="flex-end">
-              <SearchFilter />
+              <Box sx={{ marginRight: "10px" }}>
+                <SearchFilter />
+              </Box>
             </Grid>
           </Grid>
         </Box>
         <Box>
           <PerfectScrollbar
             style={{
-              marginRight: "20px",
+              marginRight: "30px",
             }}
           >
             <Box
               sx={{
-                minHeight: "47rem",
+                minHeight: "45rem",
                 marginLeft: "2rem",
               }}
             >
@@ -147,12 +160,20 @@ const Users = () => {
                   getRowId={getRowId}
                   getRowClassName={() => `cursor-pointer`}
                   onRowClick={handleRowClick}
-                  sx={{ border: "none", minHeight: "41.5rem" }}
+                  sx={{ border: "none", minHeight: "41rem" }}
                   disableRowSelectionOnClick
                 />
               </Card>
             </Box>
           </PerfectScrollbar>
+        </Box>
+        <Box
+          sx={{
+            marginTop: "-2.5rem",
+            marginLeft: "2rem",
+          }}
+        >
+          <Footer />
         </Box>
       </Grid>
       <EditUser

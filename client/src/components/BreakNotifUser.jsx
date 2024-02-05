@@ -40,7 +40,6 @@ const BreakNotifUser = () => {
           aria-label="filter"
           style={{
             marginLeft: "10px",
-            marginRight: "50px",
           }}
           onClick={() => {}}
         >

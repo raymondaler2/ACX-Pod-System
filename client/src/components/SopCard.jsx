@@ -115,7 +115,7 @@ const SopCard = (props) => {
                 >
                   <p className="text-[9px] mr-2">
                     {Str(`${userData?.first_name} ${userData?.last_name}`)
-                      .limit(10, " ...")
+                      .limit(11, " ...")
                       .get()}
                   </p>
                   <Divider orientation="vertical" variant="middle" flexItem />

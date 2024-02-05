@@ -115,13 +115,15 @@ const SopCardBig = (props) => {
     <Card
       sx={{
         margin: "25px",
+        marginBottom: "0px",
         borderRadius: "40px",
-        minHeight: "95vh",
+        minHeight: "89vh",
       }}
     >
       <Box
         sx={{
           margin: "45px",
+          marginBottom: "0px",
           marginRight: "0px",
           maxHeight: "100%",
           overflowY: "auto",
