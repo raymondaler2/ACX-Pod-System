@@ -343,11 +343,7 @@ const EditUser = (props) => {
   }, []);
 
   useEffect(() => {
-    if (
-      relationshipOptions.length > 0 &&
-      roleOptions.length > 0 &&
-      positionOptions.length > 0
-    ) {
+    if (!firstName) {
       fetchUserData();
     }
   }, [selectedRow]);
