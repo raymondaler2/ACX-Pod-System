@@ -22,6 +22,18 @@ const Knowledgebase = () => {
     fetchSopData();
   }, []);
 
+  useEffect(() => {
+    if (Object.keys(sopData).length === 0) {
+      const intervalId = setInterval(() => {
+        if (Object.keys(sopData).length === 0) {
+          fetchSopData();
+        }
+      }, 5000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [sopData]);
+
   const hasFeaturedSop = sopData.some((sop) => sop.featured);
 
   return (

@@ -16,6 +16,7 @@ import {
   DialogActions,
   Snackbar,
   Alert as MuiAlert,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIosNewOutlinedIcon from "@mui/icons-material/ArrowBackIosNewOutlined";
@@ -111,6 +112,22 @@ const SopCardBig = (props) => {
     editorName();
   }, []);
 
+  useEffect(() => {
+    if (publisher.trim().length === 0 && editor.trim().length === 0) {
+      const intervalId = setInterval(() => {
+        if (
+          Object.keys(publisher).length === 0 &&
+          Object.keys(editor).length === 0
+        ) {
+          publisherName();
+          editorName();
+        }
+      }, 5000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [publisher, editor]);
+
   return (
     <Card
       sx={{
@@ -203,7 +220,7 @@ const SopCardBig = (props) => {
                 }}
               >
                 <p className="text-center text-[14px] font-medium">
-                  {Str(data?.service_tag).limit(8, " ...").get()}
+                  {data?.service_tag}
                 </p>
               </Grid>
               <Box
@@ -246,7 +263,11 @@ const SopCardBig = (props) => {
                     <h2 className="text-[14px] font-bold">Publisher:</h2>
                   </Grid>
                   <Grid item xs={6}>
-                    <h2 className="text-[14px]">{publisher}</h2>
+                    {publisher.trim().length > 0 ? (
+                      <h2 className="text-[14px]">{publisher}</h2>
+                    ) : (
+                      <CircularProgress size={10} />
+                    )}
                   </Grid>
                   <Grid item xs={6}>
                     <h2 className="text-[14px] font-bold mt-[10px]">
@@ -276,7 +297,11 @@ const SopCardBig = (props) => {
                     </h2>
                   </Grid>
                   <Grid item xs={6}>
-                    <h2 className="text-[14px] mt-[10px]">{editor}</h2>
+                    {editor.trim().length > 0 ? (
+                      <h2 className="text-[14px] mt-[10px]">{editor}</h2>
+                    ) : (
+                      <CircularProgress size={10} sx={{ marginTop: "10px" }} />
+                    )}
                   </Grid>
                   <Grid item xs={6}>
                     <h2 className="text-[14px] font-bold mt-[10px]">
