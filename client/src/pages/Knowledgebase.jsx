@@ -1,4 +1,4 @@
-import { Box, Divider, Grid } from "@mui/material";
+import { Box, CircularProgress, Divider, Grid } from "@mui/material";
 import NavSideBar from "./../components/NavSideBar.jsx";
 import CreateFilterButton from "./../components/CreateFilterButton.jsx";
 import SearchbarWide from "./../components/SearchbarWide.jsx";
@@ -54,10 +54,17 @@ const Knowledgebase = () => {
         <Box>
           <PerfectScrollbar>
             <Box
-              sx={{
-                minHeight: "47rem",
-                marginLeft: "2rem",
-              }}
+              sx={
+                hasFeaturedSop
+                  ? {
+                      minHeight: "47rem",
+                      marginLeft: "2rem",
+                    }
+                  : {
+                      minHeight: "48.5rem",
+                      marginLeft: "2rem",
+                    }
+              }
             >
               {hasFeaturedSop && (
                 <p className="font-bold text-[20px] mb-[20px]">Featured SOP</p>
@@ -66,8 +73,21 @@ const Knowledgebase = () => {
                 container
                 rowSpacing={3}
                 columnSpacing={0}
-                sx={{ maxHeight: "50vh" }}
+                sx={{ maxHeight: "50vh", minHeight: "50vh" }}
               >
+                {sopData.length === 0 && (
+                  <Box
+                    sx={{
+                      marginLeft: "50rem",
+                      minHeight: "50rem",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <CircularProgress />
+                  </Box>
+                )}
                 {sopData.map((sop) => {
                   if (sop.featured) {
                     return <SopCard sop={sop} />;

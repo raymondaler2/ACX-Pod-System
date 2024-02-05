@@ -1,4 +1,4 @@
-import { Box, Card, Grid } from "@mui/material";
+import { Box, Card, CircularProgress, Grid } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import NavSideBar from "./../components/NavSideBar.jsx";
 import PerfectScrollbar from "react-perfect-scrollbar";
@@ -154,15 +154,28 @@ const Users = () => {
                   padding: "20px",
                 }}
               >
-                <DataGrid
-                  columns={columns}
-                  rows={rows}
-                  getRowId={getRowId}
-                  getRowClassName={() => `cursor-pointer`}
-                  onRowClick={handleRowClick}
-                  sx={{ border: "none", minHeight: "41rem" }}
-                  disableRowSelectionOnClick
-                />
+                {rows.length > 0 ? (
+                  <DataGrid
+                    columns={columns}
+                    rows={rows}
+                    getRowId={getRowId}
+                    getRowClassName={() => `cursor-pointer`}
+                    onRowClick={handleRowClick}
+                    sx={{ border: "none", minHeight: "41rem" }}
+                    disableRowSelectionOnClick
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      minHeight: "41rem",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <CircularProgress />
+                  </Box>
+                )}
               </Card>
             </Box>
           </PerfectScrollbar>
