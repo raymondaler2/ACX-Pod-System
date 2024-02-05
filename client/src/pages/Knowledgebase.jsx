@@ -11,6 +11,7 @@ import axios from "axios";
 
 const Knowledgebase = () => {
   const [sopData, setSopData] = useState([]);
+  const [createClicked, setCreateClicked] = useState(false);
 
   const fetchSopData = async () => {
     const site = import.meta.env.VITE_SITE;
@@ -23,7 +24,7 @@ const Knowledgebase = () => {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(sopData).length === 0) {
+    if (Object.keys(sopData).length === 0 && createClicked === false) {
       const intervalId = setInterval(() => {
         if (Object.keys(sopData).length === 0) {
           fetchSopData();
@@ -32,7 +33,7 @@ const Knowledgebase = () => {
 
       return () => clearInterval(intervalId);
     }
-  }, [sopData]);
+  }, [sopData, createClicked]);
 
   const hasFeaturedSop = sopData.some((sop) => sop.featured);
 
@@ -51,7 +52,10 @@ const Knowledgebase = () => {
         >
           <Grid container spacing={2}>
             <Grid item xs={1.5} justifyContent="flex-start">
-              <CreateFilterButton />
+              <CreateFilterButton
+                createClicked={createClicked}
+                setCreateClicked={setCreateClicked}
+              />
             </Grid>
             <Grid item xs={7.5}>
               <SearchbarWide />

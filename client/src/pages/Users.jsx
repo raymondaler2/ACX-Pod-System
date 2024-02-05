@@ -15,6 +15,7 @@ const Users = () => {
   const [rows, SetRows] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [editClicked, setEditClicked] = useState(false);
+  const [createClicked, setCreateClicked] = useState(false);
 
   const columns = [
     {
@@ -101,6 +102,18 @@ const Users = () => {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    if (Object.keys(rows).length === 0 && createClicked === false) {
+      const intervalId = setInterval(() => {
+        if (Object.keys(rows).length === 0) {
+          fetchUsers();
+        }
+      }, 5000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [rows, createClicked]);
+
   return (
     <Grid container spacing={2}>
       <Grid item xs={1.9}>
@@ -126,7 +139,10 @@ const Users = () => {
           </Grid>
           <Grid container spacing={2}>
             <Grid item xs={1.5}>
-              <CreateButtonUsers />
+              <CreateButtonUsers
+                createClicked={createClicked}
+                setCreateClicked={setCreateClicked}
+              />
             </Grid>
             <Grid item xs={7.5}></Grid>
             <Grid item xs={3} container justifyContent="flex-end">

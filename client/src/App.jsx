@@ -5,6 +5,7 @@ import Knowledgebase from "./pages/Knowledgebase.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import { useEffect, useState } from "react";
 import KnowledgebaseSOP from "./components/KnowledgebaseSOP.jsx";
+import UserProfile from "./pages/UserProfile.jsx";
 import Users from "./pages/Users.jsx";
 import axios from "axios";
 
@@ -28,6 +29,7 @@ const App = () => {
         <Route path="/Login" element={<Login />} />
         <Route path="/" element={<Home />} />
         <Route path="/Knowledgebase" element={<Knowledgebase />} />
+        <Route path="/UserProfile" element={<UserProfile />} />
         {sopIDs?.map((data) => (
           <Route
             path={`/Knowledgebase/${data._id}`}
