@@ -6,3 +6,7 @@ body {
   background-color: #f1f2f6;
   overflow: hidden;
 }
+
+.MuiDataGrid-cell:focus {
+  outline: none !important;
+}

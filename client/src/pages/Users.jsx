@@ -9,6 +9,7 @@ import EditUser from "./../components/EditUser.jsx";
 import axios from "axios";
 
 const Users = () => {
+  const getRowId = (row) => row.id;
   const [rows, SetRows] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [editClicked, setEditClicked] = useState(false);
@@ -143,6 +144,8 @@ const Users = () => {
                 <DataGrid
                   columns={columns}
                   rows={rows}
+                  getRowId={getRowId}
+                  getRowClassName={() => `cursor-pointer`}
                   onRowClick={handleRowClick}
                   sx={{ border: "none", minHeight: "41.5rem" }}
                   disableRowSelectionOnClick

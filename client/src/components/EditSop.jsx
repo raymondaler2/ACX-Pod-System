@@ -36,6 +36,9 @@ const EditSop = (props) => {
   const [sopTitle, setSopTitle] = useState("");
   const [sopServiceTag, setSopServiceTag] = useState("");
   const [sopDescription, setSopDescription] = useState("");
+  const [activeMilestone, setActiveMilestone] = useState(0);
+  const [milestoneDescription, setMilestoneDescription] = useState("");
+  const [checklistTitle, setChecklistTitle] = useState("");
   const [sopPageTwo, setSopPageTwo] = useState(false);
   const [sopMilestones, setSopMilestones] = useState([
     {
@@ -48,9 +51,6 @@ const EditSop = (props) => {
       ],
     },
   ]);
-  const [activeMilestone, setActiveMilestone] = useState(0);
-  const [milestoneDescription, setMilestoneDescription] = useState("");
-  const [checklistTitle, setChecklistTitle] = useState("");
 
   const handleSave = async () => {
     const sop = {
@@ -75,6 +75,7 @@ const EditSop = (props) => {
       sop
     );
     if (result.status === 200) {
+      handleClose();
       setSopPageTwo(false);
       setSnackbarOpen(true);
     }
