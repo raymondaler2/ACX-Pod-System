@@ -150,10 +150,12 @@ const EditUser = (props) => {
 
   const handleCancelclick = () => {
     handleClose();
+    setConfirmEdit(true);
   };
 
   const handleCancelclickPageTwo = () => {
     setEditClickedTwo(false);
+    setConfirmEdit(true);
   };
 
   const handleNext = () => {
