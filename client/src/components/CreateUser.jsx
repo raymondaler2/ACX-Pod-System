@@ -18,6 +18,7 @@ import {
   Input,
   Snackbar,
   Alert as MuiAlert,
+  LinearProgress,
 } from "@mui/material";
 import axios from "axios";
 import { createFilterOptions } from "@mui/material/Autocomplete";
@@ -61,6 +62,7 @@ const CreateUser = (props) => {
   const [resumeCvFile, setResumeCvFile] = useState(null);
   const [portfolioFile, setPortfolioFile] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const dateObject = birthday instanceof dayjs ? birthday?.toDate() : null;
 
@@ -220,13 +222,16 @@ const CreateUser = (props) => {
 
     try {
       const site = import.meta.env.VITE_SITE;
-      const result = await axios.post(
+      const promise = axios.post(
         `http://${site}:3000/api/user`,
         formData,
         config
       );
+      setIsLoading(true);
+      const result = await promise;
 
       if (result.status === 200) {
+        setIsLoading(false);
         setSnackbarOpen(true);
       }
     } catch (error) {
@@ -343,6 +348,7 @@ const CreateUser = (props) => {
                   First Name
                 </InputLabel>
                 <TextField
+                  disabled={isLoading}
                   fullWidth
                   id="first-name"
                   variant="outlined"
@@ -361,6 +367,7 @@ const CreateUser = (props) => {
                   Address
                 </InputLabel>
                 <TextField
+                  disabled={isLoading}
                   fullWidth
                   id="address"
                   variant="outlined"
@@ -379,6 +386,7 @@ const CreateUser = (props) => {
                   Email Address
                 </InputLabel>
                 <TextField
+                  disabled={isLoading}
                   fullWidth
                   id="email-address"
                   variant="outlined"
@@ -400,6 +408,7 @@ const CreateUser = (props) => {
                   Last Name
                 </InputLabel>
                 <TextField
+                  disabled={isLoading}
                   fullWidth
                   id="last-name"
                   variant="outlined"
@@ -426,6 +435,7 @@ const CreateUser = (props) => {
                           fullWidth
                         >
                           <DatePicker
+                            disabled={isLoading}
                             label="MM/DD/YYYY"
                             fullWidth
                             value={birthday}
@@ -454,6 +464,7 @@ const CreateUser = (props) => {
                         <FormControl fullWidth variant="outlined">
                           <InputLabel id="gender-label">Gender</InputLabel>
                           <Select
+                            disabled={isLoading}
                             abelId="gender-label"
                             id="gender"
                             value={gender}
@@ -479,6 +490,7 @@ const CreateUser = (props) => {
                   Contact Number
                 </InputLabel>
                 <TextField
+                  disabled={isLoading}
                   fullWidth
                   id="contact-number"
                   variant="outlined"
@@ -505,6 +517,7 @@ const CreateUser = (props) => {
                 Emergency Contact
               </InputLabel>
               <TextField
+                disabled={isLoading}
                 fullWidth
                 id="first-name"
                 variant="outlined"
@@ -543,6 +556,7 @@ const CreateUser = (props) => {
                 Relationship
               </InputLabel>
               <Autocomplete
+                disabled={isLoading}
                 selectOnFocus
                 clearOnBlur
                 handleHomeEndKeys
@@ -600,6 +614,7 @@ const CreateUser = (props) => {
           }}
         >
           <Button
+            disabled={isLoading}
             onClick={handleNext}
             variant="contained"
             sx={{
@@ -690,6 +705,7 @@ const CreateUser = (props) => {
                       Username
                     </InputLabel>
                     <TextField
+                      disabled={isLoading}
                       fullWidth
                       id="user-name"
                       variant="outlined"
@@ -708,6 +724,7 @@ const CreateUser = (props) => {
                       Password
                     </InputLabel>
                     <TextField
+                      disabled={isLoading}
                       id="password"
                       label="Password"
                       variant="outlined"
@@ -733,6 +750,7 @@ const CreateUser = (props) => {
                       }}
                     />
                     <Button
+                      disabled={isLoading}
                       sx={{
                         alignSelf: "flex-start",
                         marginTop: "35px",
@@ -763,6 +781,7 @@ const CreateUser = (props) => {
                       Position
                     </InputLabel>
                     <Autocomplete
+                      disabled={isLoading}
                       selectOnFocus
                       clearOnBlur
                       handleHomeEndKeys
@@ -820,6 +839,7 @@ const CreateUser = (props) => {
                       Role
                     </InputLabel>
                     <Autocomplete
+                      disabled={isLoading}
                       selectOnFocus
                       clearOnBlur
                       handleHomeEndKeys
@@ -885,6 +905,7 @@ const CreateUser = (props) => {
                         Employee Number
                       </InputLabel>
                       <TextField
+                        disabled={isLoading}
                         fullWidth
                         id="employee-number"
                         variant="outlined"
@@ -915,6 +936,7 @@ const CreateUser = (props) => {
                       Philhealth
                     </InputLabel>
                     <TextField
+                      disabled={isLoading}
                       fullWidth
                       id="philhealth"
                       variant="outlined"
@@ -933,6 +955,7 @@ const CreateUser = (props) => {
                       PAG-IBIG
                     </InputLabel>
                     <TextField
+                      disabled={isLoading}
                       fullWidth
                       id="pag-ibig"
                       variant="outlined"
@@ -951,6 +974,7 @@ const CreateUser = (props) => {
                       Tin Number
                     </InputLabel>
                     <TextField
+                      disabled={isLoading}
                       fullWidth
                       id="tin-number"
                       variant="outlined"
@@ -971,6 +995,7 @@ const CreateUser = (props) => {
                     {nbiClearanceFile === null ? (
                       <>
                         <Input
+                          disabled={isLoading}
                           type="file"
                           id="nbi-clearance"
                           sx={{ display: "none" }}
@@ -993,6 +1018,7 @@ const CreateUser = (props) => {
                       <>
                         <label htmlFor="nbi-clearance-cancel">
                           <Button
+                            disabled={isLoading}
                             color="error"
                             variant="contained"
                             component="span"
@@ -1020,6 +1046,7 @@ const CreateUser = (props) => {
                     {resumeCvFile === null ? (
                       <>
                         <Input
+                          disabled={isLoading}
                           type="file"
                           id="resume-cv"
                           sx={{ display: "none" }}
@@ -1029,6 +1056,7 @@ const CreateUser = (props) => {
                         />
                         <label htmlFor="resume-cv">
                           <Button
+                            disabled={isLoading}
                             variant="outlined"
                             component="span"
                             startIcon={<UploadIcon />}
@@ -1042,6 +1070,7 @@ const CreateUser = (props) => {
                       <>
                         <label htmlFor="resume-cv-cancel">
                           <Button
+                            disabled={isLoading}
                             color="error"
                             variant="contained"
                             component="span"
@@ -1069,6 +1098,7 @@ const CreateUser = (props) => {
                     {portfolioFile === null ? (
                       <>
                         <Input
+                          disabled={isLoading}
                           type="file"
                           id="portfolio"
                           sx={{ display: "none" }}
@@ -1078,6 +1108,7 @@ const CreateUser = (props) => {
                         />
                         <label htmlFor="portfolio">
                           <Button
+                            disabled={isLoading}
                             variant="outlined"
                             component="span"
                             startIcon={<UploadIcon />}
@@ -1091,6 +1122,7 @@ const CreateUser = (props) => {
                       <>
                         <label htmlFor="portfolio-cancel">
                           <Button
+                            disabled={isLoading}
                             color="error"
                             variant="contained"
                             component="span"
@@ -1110,6 +1142,7 @@ const CreateUser = (props) => {
               </Grid>
             </Stack>
           </Stack>
+          {isLoading && <LinearProgress />}
         </DialogContent>
         <DialogActions
           sx={{
@@ -1119,6 +1152,7 @@ const CreateUser = (props) => {
           }}
         >
           <Button
+            disabled={isLoading}
             onClick={() => {
               handleCreateClick();
               setCreateClickedTwo(false);
@@ -1141,6 +1175,7 @@ const CreateUser = (props) => {
             Back
           </Button>
           <Button
+            disabled={isLoading}
             onClick={handleCreateUser}
             variant="contained"
             color="success"
