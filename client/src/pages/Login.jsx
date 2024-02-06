@@ -55,12 +55,16 @@ const Login = () => {
       localStorage.setItem("_id", _id);
       localStorage.setItem("token", token);
 
-      handleSnackbar(true, "success", "Login Successful");
+      handleSnackbar(true, "success", "Access granted. Welcome back!");
       saveCredentialsToLocalStorage(username, password);
       return true;
     } catch (error) {
       console.error(`LoginUser ERROR: ${error}`);
-      handleSnackbar(true, "error", "Login Error");
+      handleSnackbar(
+        true,
+        "error",
+        "Access denied. Please verify your login details."
+      );
       return false;
     }
   };

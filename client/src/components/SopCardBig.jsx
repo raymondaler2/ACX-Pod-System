@@ -412,7 +412,7 @@ const SopCardBig = (props) => {
           }}
           severity="success"
         >
-          SOP Deleted
+          Operation complete. SOP successfully deleted.
         </MuiAlert>
       </Snackbar>
     </Card>

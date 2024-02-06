@@ -714,7 +714,7 @@ const EditSop = (props) => {
           }}
           severity="success"
         >
-          SOP Edited
+          Operation complete. SOP successfully edited.
         </MuiAlert>
       </Snackbar>
     </>

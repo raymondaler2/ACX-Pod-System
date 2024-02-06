@@ -1370,7 +1370,7 @@ const EditUser = (props) => {
           }}
           severity="success"
         >
-          User Edited
+          Operation complete. User successfully edited.
         </MuiAlert>
       </Snackbar>
       <Snackbar
@@ -1395,7 +1395,7 @@ const EditUser = (props) => {
           }}
           severity="success"
         >
-          User Deleted
+          Operation complete. User successfully deleted.
         </MuiAlert>
       </Snackbar>
     </>

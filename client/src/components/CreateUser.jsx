@@ -1222,7 +1222,7 @@ const CreateUser = (props) => {
           }}
           severity="success"
         >
-          User Created
+          Operation complete. User successfully created.
         </MuiAlert>
       </Snackbar>
       <Snackbar
@@ -1244,7 +1244,7 @@ const CreateUser = (props) => {
           }}
           severity="error"
         >
-          {"Please select a PDF file."}
+          Please select a PDF file to proceed.
         </MuiAlert>
       </Snackbar>
     </>
