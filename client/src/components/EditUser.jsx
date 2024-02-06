@@ -150,6 +150,8 @@ const EditUser = (props) => {
 
   const handleCancelclick = () => {
     handleClose();
+    setGender(selectedRow?.gender);
+    setRelationship(selectedRow?.relationship.relationship);
     setConfirmEdit(true);
   };
 
@@ -526,7 +528,7 @@ const EditUser = (props) => {
                             disabled={confirmEdit}
                             abelId="gender-label"
                             id="gender"
-                            value={gender}
+                            value={!gender ? selectedRow?.gender : gender}
                             onChange={handleGenderChange}
                             label="Gender"
                           >
@@ -622,7 +624,7 @@ const EditUser = (props) => {
                 handleHomeEndKeys
                 options={relationshipOptions}
                 fullWidth
-                value={relationship}
+                value={!relationship ? selectedRow?.relationship : relationship}
                 onChange={(event, newValue) => {
                   if (newValue && newValue.label.startsWith('Add "')) {
                     const extractedValue = newValue.label

@@ -4,37 +4,123 @@ const jwt = require("jsonwebtoken");
 const UserPosition = require("./../model/userPosition");
 const UserRole = require("./../model/userRole");
 const UserRelationship = require("./../model/userRelationship");
+const { google } = require("googleapis");
+const SCOPES = ["https://www.googleapis.com/auth/drive"];
+const keyFile = require("./../key.json");
+const { Readable } = require("stream");
+
+const auth = new google.auth.GoogleAuth({
+  credentials: keyFile,
+  scopes: SCOPES,
+});
+
+const drive = google.drive({ version: "v3", auth });
+
+const uploadToDrive = async (file, type) => {
+  let folderId;
+  const folderIdNbi = "1xZY9k-Oz4D_gChltiZesEBJhdP61tIvy";
+  const folderIdResume = "133CROCAUX_HjtPlPw-MxRHw5kOdd1GnZ";
+  const folderIdPortfolio = "1LYaGmYSqWoSoCD5gP9v_kq4yrEGJu7_t";
+
+  switch (type) {
+    case "nbi":
+      folderId = folderIdNbi;
+      break;
+    case "resume":
+      folderId = folderIdResume;
+      break;
+    case "portfolio":
+      folderId = folderIdPortfolio;
+      break;
+  }
+
+  try {
+    const readableStream = Readable.from(file.buffer);
+
+    const response = await drive.files.create({
+      requestBody: {
+        name: file.originalname,
+        mimeType: file.mimetype,
+        parents: [folderId],
+      },
+      media: {
+        body: readableStream,
+      },
+    });
+
+    console.log(`File Uploaded to Google Drive. File ID: ${response.data.id}`);
+    return response.data.id;
+  } catch (error) {
+    console.error("Error uploading file to Google Drive:", error.message);
+    throw error;
+  }
+};
 
 const addUser = asyncHandler(async (req, res) => {
   try {
-    const { position, role, relationship, ...userData } = req.body;
+    const userDataFile = req.files.find(
+      (file) => file.fieldname === "user_data"
+    );
 
-    let existingPosition = await UserPosition.findOne({ position });
-    let existingUserRole = await UserRole.findOne({ role });
-    let existingRelationship = await UserRelationship.findOne({ relationship });
+    let existingPosition, existingUserRole, existingRelationship;
+
+    const userData = JSON.parse(userDataFile.buffer.toString("utf-8"));
+
+    existingPosition = await UserPosition.findOne({
+      position: userData.position,
+    });
+
+    existingUserRole = await UserRole.findOne({ role: userData.role });
+
+    existingRelationship = await UserRelationship.findOne({
+      relationship: userData.relationship,
+    });
 
     if (!existingPosition) {
-      existingPosition = await UserPosition.create({ position });
+      existingPosition = await UserPosition.create({
+        position: userData.position,
+      });
     }
 
     if (!existingUserRole) {
-      existingUserRole = await UserRole.create({ role });
+      existingUserRole = await UserRole.create({ role: userData.role });
     }
 
     if (!existingRelationship) {
-      existingRelationship = await UserRelationship.create({ relationship });
+      existingRelationship = await UserRelationship.create({
+        relationship: userData.relationship,
+      });
     }
 
-    const user = await User.create({
+    const user = new User({
       ...userData,
       position: existingPosition._id,
       role: existingUserRole._id,
       relationship: existingRelationship._id,
     });
 
+    const nbiId = await uploadToDrive(
+      req.files.find((file) => file.fieldname === "nbi_clearance"),
+      "nbi"
+    );
+    const resumeId = await uploadToDrive(
+      req.files.find((file) => file.fieldname === "resume_cv"),
+      "resume"
+    );
+    const portfolioId = await uploadToDrive(
+      req.files.find((file) => file.fieldname === "portfolio"),
+      "portfolio"
+    );
+
+    user.nbi_clearance_id = nbiId;
+    user.resume_cv_id = resumeId;
+    user.portfolio_id = portfolioId;
+
+    await user.save();
+
     res.status(200).json(`User Created: ${user._id}`);
   } catch (error) {
-    res.status(500).json(`Add User by ERROR: ${error}`);
+    res.status(500).json(`Add User by ERROR: ${error.message}`);
     console.error(`Add User by ERROR: ${error}`);
   }
 });

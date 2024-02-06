@@ -352,7 +352,7 @@ const SopCardBig = (props) => {
         </DialogTitle>
         <DialogContent>
           <p className="mt-[5px] mb-[5px]">
-            Are you sure you want to delete this user?
+            Are you sure you want to delete this SOP?
           </p>
         </DialogContent>
         <DialogActions>

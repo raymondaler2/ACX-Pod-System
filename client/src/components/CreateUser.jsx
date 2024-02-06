@@ -180,8 +180,9 @@ const CreateUser = (props) => {
   };
 
   const handleCreateUser = async () => {
-    const site = import.meta.env.VITE_SITE;
-    const result = await axios.post(`http://${site}:3000/api/user`, {
+    const formData = new FormData();
+
+    const userData = {
       first_name: firstName,
       last_name: lastName,
       address,
@@ -200,13 +201,36 @@ const CreateUser = (props) => {
       philhealth,
       pagibig,
       tin_number: tinnumber,
-      nbi_clearance: nbiClearanceFile,
-      resume_cv: resumeCvFile,
-      portfolio: portfolioFile,
       pod_designation: "Edda POD",
+    };
+    const userDataBlob = new Blob([JSON.stringify(userData)], {
+      type: "application/json",
     });
-    if (result.status === 200) {
-      setSnackbarOpen(true);
+    formData.append("user_data", userDataBlob, "user_data.json");
+
+    formData.append("nbi_clearance", nbiClearanceFile);
+    formData.append("resume_cv", resumeCvFile);
+    formData.append("portfolio", portfolioFile);
+
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    };
+
+    try {
+      const site = import.meta.env.VITE_SITE;
+      const result = await axios.post(
+        `http://${site}:3000/api/user`,
+        formData,
+        config
+      );
+
+      if (result.status === 200) {
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error("Error creating user:", error.message);
     }
   };
 
