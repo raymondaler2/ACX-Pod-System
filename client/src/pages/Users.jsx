@@ -210,6 +210,7 @@ const Users = () => {
         handleClose={handleClose}
         handleEditClick={handleEditClick}
         selectedRow={selectedRow}
+        setSelectedRow={setSelectedRow}
       />
     </Grid>
   );

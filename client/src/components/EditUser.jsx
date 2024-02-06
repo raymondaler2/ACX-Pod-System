@@ -39,7 +39,13 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 
 const EditUser = (props) => {
   const filter = createFilterOptions();
-  const { editClicked, handleClose, handleEditClick, selectedRow } = props;
+  const {
+    editClicked,
+    handleClose,
+    handleEditClick,
+    selectedRow,
+    setSelectedRow,
+  } = props;
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [address, setAddress] = useState("");
@@ -153,6 +159,7 @@ const EditUser = (props) => {
     setGender(selectedRow?.gender);
     setRelationship(selectedRow?.relationship.relationship);
     setConfirmEdit(true);
+    setSelectedRow(null);
   };
 
   const handleCancelclickPageTwo = () => {
@@ -347,7 +354,7 @@ const EditUser = (props) => {
   }, []);
 
   useEffect(() => {
-    if (!firstName) {
+    if (!!selectedRow) {
       fetchUserData();
     }
   }, [selectedRow]);
