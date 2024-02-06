@@ -1142,7 +1142,7 @@ const CreateUser = (props) => {
               </Grid>
             </Stack>
           </Stack>
-          {isLoading && <LinearProgress />}
+          {isLoading && <LinearProgress sx={{ marginTop: "20px" }} />}
         </DialogContent>
         <DialogActions
           sx={{
