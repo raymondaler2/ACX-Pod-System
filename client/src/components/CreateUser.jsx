@@ -63,6 +63,7 @@ const CreateUser = (props) => {
   const [portfolioFile, setPortfolioFile] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [snackbarOpenFileUpload, setSnackbarOpenFileUpload] = useState(false);
 
   const dateObject = birthday instanceof dayjs ? birthday?.toDate() : null;
 
@@ -80,7 +81,13 @@ const CreateUser = (props) => {
 
   const handleFileChange = (event, setFile) => {
     const selectedFile = event.target.files[0];
-    setFile(selectedFile);
+
+    if (selectedFile && selectedFile.type === "application/pdf") {
+      setFile(selectedFile);
+    } else {
+      setSnackbarOpenFileUpload(true);
+      event.target.value = null;
+    }
   };
 
   const handlePhilhealth = (e) => {
@@ -1216,6 +1223,28 @@ const CreateUser = (props) => {
           severity="success"
         >
           User Created
+        </MuiAlert>
+      </Snackbar>
+      <Snackbar
+        open={snackbarOpenFileUpload}
+        autoHideDuration={3000}
+        onClose={() => {
+          setSnackbarOpenFileUpload(false);
+        }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{
+          marginTop: "5rem",
+        }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          onClose={() => {
+            setSnackbarOpenFileUpload(false);
+          }}
+          severity="error"
+        >
+          {"Please select a PDF file."}
         </MuiAlert>
       </Snackbar>
     </>
