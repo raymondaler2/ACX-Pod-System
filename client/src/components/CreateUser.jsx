@@ -41,9 +41,9 @@ const CreateUser = (props) => {
   const [birthday, setBirthday] = useState(null);
   const [gender, setGender] = useState("");
   const [email, setEmail] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
+  const [contactNumber, setContactNumber] = useState("+63");
   const [emergencyContact, setEmergencyContact] = useState("");
-  const [emergencyNumber, setEmergencyNumber] = useState("");
+  const [emergencyNumber, setEmergencyNumber] = useState("+63");
   const [relationship, setRelationship] = useState("");
   const [relationshipOptions, setRelationshipOptions] = useState([]);
   const [createClickedTwo, setCreateClickedTwo] = useState(false);
@@ -54,7 +54,7 @@ const CreateUser = (props) => {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("");
   const [roleOptions, setRoleOptions] = useState([]);
-  const [employeeNumber, setEmployeeNumber] = useState("ACX-00-000");
+  const [employeeNumber, setEmployeeNumber] = useState("ACX-");
   const [philhealth, setphilhealth] = useState("");
   const [pagibig, setPagibig] = useState("");
   const [tinnumber, setTinnumber] = useState("");
@@ -62,8 +62,15 @@ const CreateUser = (props) => {
   const [resumeCvFile, setResumeCvFile] = useState(null);
   const [portfolioFile, setPortfolioFile] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [snackbarOpenFileUpload, setSnackbarOpenFileUpload] = useState(false);
+
+  const customDialogStyles = {
+    borderRadius: "40px",
+    padding: "10px",
+    minWidth: "80rem",
+  };
 
   const dateObject = birthday instanceof dayjs ? birthday?.toDate() : null;
 
@@ -85,67 +92,109 @@ const CreateUser = (props) => {
     if (selectedFile && selectedFile.type === "application/pdf") {
       setFile(selectedFile);
     } else {
-      setSnackbarOpenFileUpload(true);
+      handleSnackbar(true, "error", "Please select a PDF file to proceed.");
       event.target.value = null;
     }
   };
 
-  const handlePhilhealth = (e) => {
-    setphilhealth(e.target.value);
+  const onChangeHandler = (e, set) => {
+    set(e.target.value);
   };
 
-  const handlePagibigChange = (e) => {
-    setPagibig(e.target.value);
+  const handleKeyDown = (e) => {
+    if (e.key === "-" && e.target.selectionStart === e.target.selectionEnd) {
+      e.preventDefault();
+    }
   };
 
-  const handleTinnumberChange = (e) => {
-    setTinnumber(e.target.value);
-  };
+  const onChangeNumberHandler = (e, set, type, gov) => {
+    switch (type) {
+      case "acx": {
+        let input = e.target.value.replace(/[^\dACX-]/g, "");
 
-  const handleFirstNameChange = (e) => {
-    setFirstName(e.target.value);
-  };
+        if (!input.startsWith("ACX-")) {
+          input = "ACX-" + input.slice(3);
+        }
 
-  const handleLastNameChange = (e) => {
-    setLastName(e.target.value);
-  };
+        if (input.length <= 10) {
+          const dashCount = (input.match(/\-/g) || []).length;
 
-  const handleAddressChange = (e) => {
-    setAddress(e.target.value);
+          if (dashCount > 2) {
+            input = input.slice(0, input.lastIndexOf("-"));
+          }
+
+          if (
+            input.length === 6 &&
+            input.charAt(5) !== "-" &&
+            e.nativeEvent.inputType !== "deleteContentBackward"
+          ) {
+            input += "-";
+          }
+
+          set(input);
+        }
+
+        break;
+      }
+      case "gov": {
+        let input = e.target.value.replace(/[^\d-]/g, "");
+
+        switch (gov) {
+          case "philhealth": {
+            input = input.replace(/(\d{4}(?=\d))/g, "$1-");
+            input = input.replace(/-$/, "");
+            if (input.length <= 14) {
+              set(input);
+            }
+
+            break;
+          }
+          case "pagibig": {
+            input = input.replace(/(\d{4}(?=\d))/g, "$1-");
+            input = input.replace(/-$/, "");
+            if (input.length <= 14) {
+              set(input);
+            }
+
+            break;
+          }
+          case "tinnumber": {
+            input = input.replace(/(\d{3}(?=\d))/g, "$1-");
+            input = input.replace(/-$/, "");
+            if (input.length <= 15) {
+              set(input);
+            }
+
+            break;
+          }
+        }
+
+        break;
+      }
+      case "phone": {
+        let input = e.target.value.replace(/[^\d+]/g, "");
+
+        if (!input.startsWith("+63")) {
+          input = "+63" + input.slice(3);
+        }
+
+        if (input.length <= 13) {
+          const plusCount = (input.match(/\+/g) || []).length;
+
+          if (plusCount > 1) {
+            input = input.slice(0, input.lastIndexOf("+"));
+          }
+
+          set(input);
+        }
+
+        break;
+      }
+    }
   };
 
   const handleBirthdayChange = (date) => {
     setBirthday(date);
-  };
-
-  const handleGenderChange = (e) => {
-    setGender(e.target.value);
-  };
-
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-  };
-
-  const handleContactNumberChange = (e) => {
-    const input = e.target.value.replace(/\D/g, "");
-    setContactNumber(input);
-  };
-
-  const handleEmergencyContactChange = (e) => {
-    setEmergencyContact(e.target.value);
-  };
-
-  const handleEmergencyNumberChange = (e) => {
-    const input = e.target.value.replace(/\D/g, "");
-    setEmergencyNumber(input);
-  };
-
-  const handleUsernameChange = (e) => {
-    setUsername(e.target.value);
-  };
-
-  const handleEmployeeNumberChange = (e) => {
-    setEmployeeNumber(e.target.value);
   };
 
   const clearData = () => {
@@ -155,16 +204,16 @@ const CreateUser = (props) => {
     setBirthday(null);
     setGender("");
     setEmail("");
-    setContactNumber("");
+    setContactNumber("+63");
     setEmergencyContact("");
-    setEmergencyNumber("");
+    setEmergencyNumber("+63");
     setRelationship("");
     setUsername("");
     setPosition("");
     setPassword("");
     setShowPassword(false);
     setRole("");
-    setEmployeeNumber("ACX-00-000");
+    setEmployeeNumber("ACX-");
     setphilhealth("");
     setPagibig("");
     setTinnumber("");
@@ -183,7 +232,23 @@ const CreateUser = (props) => {
     setCreateClickedTwo(false);
   };
 
+  const validatePageOne = () => {
+    // if (!firstName) {
+    //   return false;
+    // }
+    return true;
+  };
+
   const handleNext = () => {
+    const passed = validatePageOne();
+    if (!passed) {
+      handleSnackbar(
+        true,
+        "error",
+        "Please provide information in all fields."
+      );
+      return;
+    }
     setCreateClickedTwo(true);
     handleClose();
   };
@@ -239,17 +304,15 @@ const CreateUser = (props) => {
 
       if (result.status === 200) {
         setIsLoading(false);
-        setSnackbarOpen(true);
+        handleSnackbar(
+          true,
+          "success",
+          "Operation complete. User successfully created."
+        );
       }
     } catch (error) {
       console.error("Error creating user:", error.message);
     }
-  };
-
-  const customDialogStyles = {
-    borderRadius: "40px",
-    padding: "10px",
-    minWidth: "80rem",
   };
 
   const generateRandomPassword = () => {
@@ -310,6 +373,16 @@ const CreateUser = (props) => {
     setRoleOptions(formattedRoles);
   };
 
+  const handleSnackbar = (open, severity, message) => {
+    if (open === true) {
+      setSnackbarOpen(open);
+      setSnackbarSeverity(severity);
+      setSnackbarMessage(message);
+    } else {
+      setSnackbarOpen(open);
+    }
+  };
+
   useEffect(() => {
     fetchRelationships();
     fetchOptions();
@@ -361,7 +434,9 @@ const CreateUser = (props) => {
                   variant="outlined"
                   label="First Name"
                   value={firstName}
-                  onChange={handleFirstNameChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setFirstName);
+                  }}
                 />
                 <InputLabel
                   htmlFor="address"
@@ -380,7 +455,9 @@ const CreateUser = (props) => {
                   variant="outlined"
                   label="Address"
                   value={address}
-                  onChange={handleAddressChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setAddress);
+                  }}
                 />
                 <InputLabel
                   htmlFor="email-address"
@@ -399,7 +476,9 @@ const CreateUser = (props) => {
                   variant="outlined"
                   label="Email Address"
                   value={email}
-                  onChange={handleEmailChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setEmail);
+                  }}
                 />
               </Stack>
             </Grid>
@@ -421,7 +500,9 @@ const CreateUser = (props) => {
                   variant="outlined"
                   label="Last Name"
                   value={lastName}
-                  onChange={handleLastNameChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setLastName);
+                  }}
                 />
                 <Stack direction="row">
                   <Grid container spacing={2}>
@@ -475,7 +556,9 @@ const CreateUser = (props) => {
                             abelId="gender-label"
                             id="gender"
                             value={gender}
-                            onChange={handleGenderChange}
+                            onChange={(e) => {
+                              onChangeHandler(e, setGender);
+                            }}
                             label="Gender"
                           >
                             <MenuItem value="Male">Male</MenuItem>
@@ -503,7 +586,9 @@ const CreateUser = (props) => {
                   variant="outlined"
                   label="Enter Number"
                   value={contactNumber}
-                  onChange={handleContactNumberChange}
+                  onChange={(e) => {
+                    onChangeNumberHandler(e, setContactNumber, "phone", "");
+                  }}
                 />
               </Stack>
             </Grid>
@@ -530,7 +615,9 @@ const CreateUser = (props) => {
                 variant="outlined"
                 label="Enter Full Name"
                 value={emergencyContact}
-                onChange={handleEmergencyContactChange}
+                onChange={(e) => {
+                  onChangeHandler(e, setEmergencyContact);
+                }}
               />
             </Grid>
             <Grid item xs={6}>
@@ -549,7 +636,9 @@ const CreateUser = (props) => {
                 variant="outlined"
                 label="Emergency Number"
                 value={emergencyNumber}
-                onChange={handleEmergencyNumberChange}
+                onChange={(e) => {
+                  onChangeNumberHandler(e, setEmergencyNumber, "phone", "");
+                }}
               />
             </Grid>
             <Grid item xs={6}>
@@ -718,7 +807,9 @@ const CreateUser = (props) => {
                       variant="outlined"
                       label="Username"
                       value={username}
-                      onChange={handleUsernameChange}
+                      onChange={(e) => {
+                        onChangeHandler(e, setUsername);
+                      }}
                     />
                     <InputLabel
                       htmlFor="password"
@@ -738,7 +829,9 @@ const CreateUser = (props) => {
                       fullWidth
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        onChangeHandler(e, setPassword);
+                      }}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -912,13 +1005,21 @@ const CreateUser = (props) => {
                         Employee Number
                       </InputLabel>
                       <TextField
+                        onKeyDown={handleKeyDown}
                         disabled={isLoading}
                         fullWidth
                         id="employee-number"
                         variant="outlined"
                         label="Employee Number"
                         value={employeeNumber}
-                        onChange={handleEmployeeNumberChange}
+                        onChange={(e) => {
+                          onChangeNumberHandler(
+                            e,
+                            setEmployeeNumber,
+                            "acx",
+                            ""
+                          );
+                        }}
                       />
                     </Stack>
                   </Stack>
@@ -949,7 +1050,14 @@ const CreateUser = (props) => {
                       variant="outlined"
                       label="Philhealth"
                       value={philhealth}
-                      onChange={handlePhilhealth}
+                      onChange={(e) => {
+                        onChangeNumberHandler(
+                          e,
+                          setphilhealth,
+                          "gov",
+                          "philhealth"
+                        );
+                      }}
                     />
                     <InputLabel
                       htmlFor="pag-ibig"
@@ -968,7 +1076,9 @@ const CreateUser = (props) => {
                       variant="outlined"
                       label="PAG-IBIG"
                       value={pagibig}
-                      onChange={handlePagibigChange}
+                      onChange={(e) => {
+                        onChangeNumberHandler(e, setPagibig, "gov", "pagibig");
+                      }}
                     />
                     <InputLabel
                       htmlFor="tin-number"
@@ -987,7 +1097,14 @@ const CreateUser = (props) => {
                       variant="outlined"
                       label="Tin Number"
                       value={tinnumber}
-                      onChange={handleTinnumberChange}
+                      onChange={(e) => {
+                        onChangeNumberHandler(
+                          e,
+                          setTinnumber,
+                          "gov",
+                          "tinnumber"
+                        );
+                      }}
                     />
                   </Stack>
                 </Grid>
@@ -1204,10 +1321,16 @@ const CreateUser = (props) => {
         open={snackbarOpen}
         autoHideDuration={1000}
         onClose={() => {
-          setSnackbarOpen(false);
-          clearData();
-          setCreateClickedTwo(false);
-          window.location.reload();
+          if (
+            snackbarMessage === "Operation complete. User successfully created."
+          ) {
+            handleSnackbar(false, "", "");
+            clearData();
+            setCreateClickedTwo(false);
+            window.location.reload();
+            return;
+          }
+          handleSnackbar(false, "", "");
         }}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         sx={{
@@ -1218,33 +1341,21 @@ const CreateUser = (props) => {
           elevation={6}
           variant="filled"
           onClose={() => {
-            setSnackbarOpen(false);
+            if (
+              snackbarMessage ===
+              "Operation complete. User successfully created."
+            ) {
+              handleSnackbar(false, "", "");
+              clearData();
+              setCreateClickedTwo(false);
+              window.location.reload();
+              return;
+            }
+            handleSnackbar(false, "", "");
           }}
-          severity="success"
+          severity={snackbarSeverity}
         >
-          Operation complete. User successfully created.
-        </MuiAlert>
-      </Snackbar>
-      <Snackbar
-        open={snackbarOpenFileUpload}
-        autoHideDuration={3000}
-        onClose={() => {
-          setSnackbarOpenFileUpload(false);
-        }}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        sx={{
-          marginTop: "5rem",
-        }}
-      >
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          onClose={() => {
-            setSnackbarOpenFileUpload(false);
-          }}
-          severity="error"
-        >
-          Please select a PDF file to proceed.
+          {snackbarMessage}
         </MuiAlert>
       </Snackbar>
     </>
