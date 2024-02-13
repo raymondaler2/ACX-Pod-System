@@ -1,10 +1,11 @@
-import { Box, Card, CircularProgress, Grid } from "@mui/material";
+import { Box, Card, CircularProgress, Grid, Stack } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import NavSideBar from "./../components/NavSideBar.jsx";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { useEffect, useState } from "react";
 import SearchFilter from "./../components/SearchFilter.jsx";
 import CreateButtonUsers from "../components/CreateButtonUsers.jsx";
+import DeleteButtonUsers from "../components/DeleteButtonUsers.jsx";
 import EditUser from "./../components/EditUser.jsx";
 import BreakNotifUser from "./../components/BreakNotifUser.jsx";
 import Footer from "./../components/Footer.jsx";
@@ -14,6 +15,7 @@ const Users = () => {
   const getRowId = (row) => row.id;
   const [rows, SetRows] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedRowsDelete, setSelectedRowsDelete] = useState([]);
   const [editClicked, setEditClicked] = useState(false);
   const [createClicked, setCreateClicked] = useState(false);
 
@@ -64,7 +66,7 @@ const Users = () => {
   const mapUserData = (userData) => {
     return userData.map((user, index) => ({
       ...user,
-      id: index + 1,
+      id: user._id,
       lastName: user.last_name,
       firstName: user.first_name,
       position: user.position.position,
@@ -139,10 +141,13 @@ const Users = () => {
           </Grid>
           <Grid container spacing={2}>
             <Grid item xs={1.5}>
-              <CreateButtonUsers
-                createClicked={createClicked}
-                setCreateClicked={setCreateClicked}
-              />
+              <Stack direction="row">
+                <CreateButtonUsers
+                  createClicked={createClicked}
+                  setCreateClicked={setCreateClicked}
+                />
+                <DeleteButtonUsers selectedRowsDelete={selectedRowsDelete} />
+              </Stack>
             </Grid>
             <Grid item xs={7.5}></Grid>
             <Grid item xs={3} container justifyContent="flex-end">
@@ -178,6 +183,10 @@ const Users = () => {
                     getRowClassName={() => `cursor-pointer`}
                     onRowClick={handleRowClick}
                     sx={{ border: "none", minHeight: "41rem" }}
+                    checkboxSelection
+                    onRowSelectionModelChange={(newRowSelectionModel) => {
+                      setSelectedRowsDelete(newRowSelectionModel);
+                    }}
                     disableRowSelectionOnClick
                   />
                 ) : (
