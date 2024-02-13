@@ -130,7 +130,7 @@ const SopCard = (props) => {
                       <CircularProgress size={10} />
                     ) : (
                       Str(`${userData?.first_name} ${userData?.last_name}`)
-                        .limit(11, " ...")
+                        .limit(10, " ...")
                         .get()
                     )}
                   </p>
