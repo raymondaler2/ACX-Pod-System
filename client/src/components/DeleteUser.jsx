@@ -5,6 +5,8 @@ import {
   DialogContent,
   DialogTitle,
   LinearProgress,
+  Alert as MuiAlert,
+  Snackbar,
 } from "@mui/material";
 import axios from "axios";
 import { useState } from "react";
@@ -13,6 +15,7 @@ const DeleteUser = (params) => {
   const { selectedRowsDelete, deleteClicked, handleDeleteClicked } = params;
   const [deleteCount, setDeleteCount] = useState(0);
   const [isloading, setIsLoading] = useState(false);
+  const [snackbarOpenDeleted, setSnackbarOpenDeleted] = useState(false);
 
   const handleOnDelete = async () => {
     setIsLoading(true);
@@ -29,8 +32,7 @@ const DeleteUser = (params) => {
       })
     ).then(() => {
       setIsLoading(false);
-      handleDeleteClicked();
-      window.location.reload();
+      setSnackbarOpenDeleted(true);
     });
   };
 
@@ -94,6 +96,38 @@ const DeleteUser = (params) => {
           </Button>
         </DialogActions>
       </Dialog>
+      <Snackbar
+        open={snackbarOpenDeleted}
+        autoHideDuration={1000}
+        onClose={() => {
+          setSnackbarOpenDeleted(false);
+          handleDeleteClicked();
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+        }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{
+          marginTop: "5rem",
+        }}
+      >
+        <MuiAlert
+          elevation={6}
+          variant="filled"
+          onClose={() => {
+            setSnackbarOpenDeleted(false);
+            handleDeleteClicked();
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
+          }}
+          severity="success"
+        >
+          {selectedRowsDelete?.length === 1
+            ? "Operation complete. User successfully deleted."
+            : "Operation complete. Selected Users successfully deleted."}
+        </MuiAlert>
+      </Snackbar>
     </>
   );
 };

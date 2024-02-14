@@ -18,6 +18,7 @@ import {
   Input,
   Snackbar,
   Alert as MuiAlert,
+  LinearProgress,
 } from "@mui/material";
 import axios from "axios";
 import { createFilterOptions } from "@mui/material/Autocomplete";
@@ -27,11 +28,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import {
-  TroubleshootOutlined,
-  Visibility,
-  VisibilityOff,
-} from "@mui/icons-material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import UploadIcon from "@mui/icons-material/Upload";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
@@ -76,6 +73,7 @@ const EditUser = (props) => {
   const [snackbarOpenDeleted, setSnackbarOpenDeleted] = useState(false);
   const [confirmEdit, setConfirmEdit] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isloading, setIsLoading] = useState(false);
 
   const dateObject = birthday instanceof dayjs ? birthday?.toDate() : null;
 
@@ -181,12 +179,14 @@ const EditUser = (props) => {
   };
 
   const handleOnDelete = async () => {
+    setIsLoading(true);
     const site = import.meta.env.VITE_SITE;
     const result = await axios.delete(
       `http://${site}:3000/api/user/${selectedRow?._id}`
     );
 
     if (result.status === 200) {
+      setIsLoading(false);
       setSnackbarOpenDeleted(true);
     }
   };
@@ -1311,9 +1311,11 @@ const EditUser = (props) => {
           <p className="mt-[5px] mb-[5px]">
             Are you sure you want to delete this user?
           </p>
+          {isloading && <LinearProgress sx={{ marginTop: "40px" }} />}
         </DialogContent>
         <DialogActions>
           <Button
+            disabled={isloading}
             onClick={() => {
               setConfirmDelete(false);
             }}
@@ -1332,6 +1334,7 @@ const EditUser = (props) => {
             No
           </Button>
           <Button
+            disabled={isloading}
             onClick={handleOnDelete}
             variant="contained"
             color="error"
