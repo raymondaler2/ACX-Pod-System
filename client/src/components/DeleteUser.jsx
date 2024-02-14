@@ -4,6 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  LinearProgress,
 } from "@mui/material";
 import axios from "axios";
 import { useState } from "react";
@@ -11,8 +12,10 @@ import { useState } from "react";
 const DeleteUser = (params) => {
   const { selectedRowsDelete, deleteClicked, handleDeleteClicked } = params;
   const [deleteCount, setDeleteCount] = useState(0);
+  const [isloading, setIsLoading] = useState(false);
 
   const handleOnDelete = async () => {
+    setIsLoading(true);
     Promise.all(
       await selectedRowsDelete.map(async (user_id) => {
         const site = import.meta.env.VITE_SITE;
@@ -25,6 +28,7 @@ const DeleteUser = (params) => {
         }
       })
     ).then(() => {
+      setIsLoading(false);
       handleDeleteClicked();
       window.location.reload();
     });
@@ -51,9 +55,11 @@ const DeleteUser = (params) => {
               ? "Are you sure you want to delete this user?"
               : "Are you sure you want to delete the selected users?"}
           </p>
+          {isloading && <LinearProgress sx={{ marginTop: "40px" }} />}
         </DialogContent>
         <DialogActions>
           <Button
+            disabled={isloading}
             onClick={handleDeleteClicked}
             variant="contained"
             color="success"
@@ -70,6 +76,7 @@ const DeleteUser = (params) => {
             No
           </Button>
           <Button
+            disabled={isloading}
             onClick={handleOnDelete}
             variant="contained"
             color="error"
