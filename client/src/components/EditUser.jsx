@@ -593,6 +593,7 @@ const EditUser = (props) => {
       );
       return;
     }
+    const formData = new FormData();
 
     const parsedDate = dayjs(selectedRow?.birthday);
 
