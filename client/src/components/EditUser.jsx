@@ -549,21 +549,6 @@ const EditUser = (props) => {
     const tinnumberValid =
       notEmpty(tinnumber, "Tin Number", setTinnumberError) &&
       isValidGovNumber(tinnumber, "Tin Number", setTinnumberError);
-    const nbiClearanceFileValid = notEmpty(
-      nbiClearanceFile,
-      "NBI Clearance",
-      setNbiClearanceFileError
-    );
-    const resumeCvFileValid = notEmpty(
-      resumeCvFile,
-      "Resume / CV",
-      setResumeCvFileError
-    );
-    const portfolioFileValid = notEmpty(
-      portfolioFile,
-      "Portfolio",
-      setPortfolioFileError
-    );
 
     if (
       usernameValid &&
@@ -573,9 +558,6 @@ const EditUser = (props) => {
       philhealthValid &&
       pagibigValid &&
       tinnumberValid
-      // nbiClearanceFileValid &&
-      // resumeCvFileValid &&
-      // portfolioFileValid
     ) {
       return true;
     }
@@ -583,6 +565,7 @@ const EditUser = (props) => {
   };
 
   const handleEditUser = async () => {
+    setIsLoading(true);
     const passed = ValidatePageTwo() && validatePageOne();
 
     if (!passed) {
@@ -637,9 +620,6 @@ const EditUser = (props) => {
       philhealth,
       pagibig,
       tin_number: tinnumber,
-      // nbi_clearance: nbiClearanceFile,
-      // resume_cv: resumeCvFile,
-      // portfolio: portfolioFile,
       pod_designation: "Edda POD",
     };
 
@@ -653,19 +633,49 @@ const EditUser = (props) => {
       Object.entries(data).filter(([_, value]) => value !== "")
     );
 
-    const site = import.meta.env.VITE_SITE;
-    const result = await axios.put(
-      `http://${site}:3000/api/user/${selectedRow?._id}`,
-      filteredData
-    );
+    const userDataBlob = new Blob([JSON.stringify(filteredData)], {
+      type: "application/json",
+    });
 
-    if (result.status === 200) {
-      setIsLoading(true);
-      handleSnackbar(
-        true,
-        "success",
-        "Operation complete. User successfully edited."
+    formData.append("user_data", userDataBlob, "user_data.json");
+
+    if (nbiClearanceFile) {
+      formData.append("nbi_clearance", nbiClearanceFile);
+    }
+
+    if (resumeCvFile) {
+      formData.append("resume_cv", resumeCvFile);
+    }
+
+    if (portfolioFile) {
+      formData.append("portfolio", portfolioFile);
+    }
+
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    };
+
+    try {
+      const site = import.meta.env.VITE_SITE;
+      const promise = await axios.put(
+        `http://${site}:3000/api/user/${selectedRow?._id}`,
+        formData,
+        config
       );
+      const result = await promise;
+
+      if (result.status === 200) {
+        setIsLoading(false);
+        handleSnackbar(
+          true,
+          "success",
+          "Operation complete. User successfully edited."
+        );
+      }
+    } catch (error) {
+      console.error("Error creating user:", error.message);
     }
   };
 
@@ -1180,7 +1190,7 @@ const EditUser = (props) => {
             Next
           </Button>
           <Button
-            disabled={confirmEdit}
+            disabled={isLoading || confirmEdit}
             onClick={handleEditUser}
             variant="contained"
             color="success"
@@ -1898,6 +1908,7 @@ const EditUser = (props) => {
             No
           </Button>
           <Button
+            disabled={isLoading}
             onClick={handleOnDelete}
             variant="contained"
             color="error"

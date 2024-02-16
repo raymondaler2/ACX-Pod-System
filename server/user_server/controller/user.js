@@ -212,30 +212,35 @@ const getUserById = asyncHandler(async (req, res) => {
 const updateUserById = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
-    const { position, role, relationship, ...userData } = req.body;
+
+    const userDataFile = req.files.find(
+      (file) => file.fieldname === "user_data"
+    );
 
     let existingPosition, existingUserRole, existingRelationship;
 
-    if (position) {
+    const userData = JSON.parse(userDataFile.buffer.toString("utf-8"));
+
+    if (userData?.position) {
       existingPosition = await UserPosition.findOneAndUpdate(
-        { position },
-        { position },
+        { position: userData?.position },
+        { position: userData?.position },
         { upsert: true, new: true }
       );
     }
 
-    if (role) {
+    if (userData?.role) {
       existingUserRole = await UserRole.findOneAndUpdate(
-        { role },
-        { role },
+        { role: userData?.role },
+        { role: userData?.role },
         { upsert: true, new: true }
       );
     }
 
-    if (relationship) {
+    if (userData?.relationship) {
       existingRelationship = await UserRelationship.findOneAndUpdate(
-        { relationship },
-        { relationship },
+        { relationship: userData?.relationship },
+        { relationship: userData?.relationship },
         { upsert: true, new: true }
       );
     }
@@ -251,12 +256,45 @@ const updateUserById = asyncHandler(async (req, res) => {
       new: true,
     });
 
+    const nbiClearanceFile = req.files.find(
+      (file) => file.fieldname === "nbi_clearance"
+    );
+
+    let nbiId;
+    if (nbiClearanceFile) {
+      nbiId = await uploadToDrive(nbiClearanceFile, "nbi");
+    }
+
+    const resumeCvFile = req.files.find(
+      (file) => file.fieldname === "resume_cv"
+    );
+
+    let resumeId;
+    if (resumeCvFile) {
+      resumeId = await uploadToDrive(resumeCvFile, "resume_cv");
+    }
+
+    const portfolioFile = req.files.find(
+      (file) => file.fieldname === "portfolio"
+    );
+
+    let portfolioId;
+    if (portfolioFile) {
+      portfolioId = await uploadToDrive(portfolioFile, "portfolio");
+    }
+
+    updatedUser.nbi_clearance_id = nbiId;
+    updatedUser.resume_cv_id = resumeId;
+    updatedUser.portfolio_id = portfolioId;
+
+    await updatedUser.save();
+
     if (!updatedUser) {
       res.status(404).json(`Update User ERROR: User with ID ${id} not found`);
       console.error(`Update User ERROR: User with ID ${id} not found`);
     }
 
-    res.status(200).json(updatedUser);
+    res.status(200).json(`User Updated: ${updatedUser._id}`);
   } catch (error) {
     res.status(500).json(`Update User ERROR: ${error}`);
     console.error(`Update User ERROR: ${error}`);
