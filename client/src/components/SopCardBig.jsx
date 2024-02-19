@@ -16,6 +16,7 @@ import {
   DialogActions,
   Snackbar,
   Alert as MuiAlert,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIosNewOutlinedIcon from "@mui/icons-material/ArrowBackIosNewOutlined";
@@ -40,6 +41,7 @@ const SopCardBig = (props) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editClicked, setEditClicked] = useState(false);
   const [publisher, SetPublisher] = useState("");
+  const [editor, SetEditor] = useState("");
   const dateObjectPublished = new Date(data?.createdAt);
   const options = { year: "numeric", month: "long", day: "numeric" };
   const formattedDatePublished = new Intl.DateTimeFormat(
@@ -89,24 +91,56 @@ const SopCardBig = (props) => {
     const user = await axios.get(
       `http://${site}:3000/api/user/${data?.user_id}`
     );
-    SetPublisher(`${user?.data.work_email}`);
+    SetPublisher(`${user?.data.first_name} ${user?.data.last_name}`);
+  };
+
+  const editorName = async () => {
+    if (data?.edit_user_id.length > 0) {
+      const site = import.meta.env.VITE_SITE;
+      const user = await axios.get(
+        `http://${site}:3000/api/user/${data?.edit_user_id}`
+      );
+
+      SetEditor(`${user?.data.first_name} ${user?.data.last_name}`);
+      return;
+    }
+    SetEditor(`None`);
   };
 
   useEffect(() => {
     publisherName();
+    editorName();
   }, []);
+
+  useEffect(() => {
+    if (publisher.trim().length === 0 && editor.trim().length === 0) {
+      const intervalId = setInterval(() => {
+        if (
+          Object.keys(publisher).length === 0 &&
+          Object.keys(editor).length === 0
+        ) {
+          publisherName();
+          editorName();
+        }
+      }, 5000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [publisher, editor]);
 
   return (
     <Card
       sx={{
         margin: "25px",
+        marginBottom: "0px",
         borderRadius: "40px",
-        minHeight: "95vh",
+        minHeight: "89vh",
       }}
     >
       <Box
         sx={{
           margin: "45px",
+          marginBottom: "0px",
           marginRight: "0px",
           maxHeight: "100%",
           overflowY: "auto",
@@ -186,7 +220,7 @@ const SopCardBig = (props) => {
                 }}
               >
                 <p className="text-center text-[14px] font-medium">
-                  {Str(data?.service_tag).limit(8, " ...").get()}
+                  {data?.service_tag}
                 </p>
               </Grid>
               <Box
@@ -229,7 +263,11 @@ const SopCardBig = (props) => {
                     <h2 className="text-[14px] font-bold">Publisher:</h2>
                   </Grid>
                   <Grid item xs={6}>
-                    <h2 className="text-[14px]">{publisher}</h2>
+                    {publisher.trim().length > 0 ? (
+                      <h2 className="text-[14px]">{publisher}</h2>
+                    ) : (
+                      <CircularProgress size={10} />
+                    )}
                   </Grid>
                   <Grid item xs={6}>
                     <h2 className="text-[14px] font-bold mt-[10px]">
@@ -259,7 +297,11 @@ const SopCardBig = (props) => {
                     </h2>
                   </Grid>
                   <Grid item xs={6}>
-                    <h2 className="text-[14px] mt-[10px]">{publisher}</h2>
+                    {editor.trim().length > 0 ? (
+                      <h2 className="text-[14px] mt-[10px]">{editor}</h2>
+                    ) : (
+                      <CircularProgress size={10} sx={{ marginTop: "10px" }} />
+                    )}
                   </Grid>
                   <Grid item xs={6}>
                     <h2 className="text-[14px] font-bold mt-[10px]">
@@ -310,7 +352,7 @@ const SopCardBig = (props) => {
         </DialogTitle>
         <DialogContent>
           <p className="mt-[5px] mb-[5px]">
-            Are you sure you want to delete this user?
+            Are you sure you want to delete this SOP?
           </p>
         </DialogContent>
         <DialogActions>
@@ -370,7 +412,7 @@ const SopCardBig = (props) => {
           }}
           severity="success"
         >
-          Sop Deleted
+          Operation complete. SOP successfully deleted.
         </MuiAlert>
       </Snackbar>
     </Card>

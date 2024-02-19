@@ -24,6 +24,10 @@ const sopSchema = mongoose.Schema(
       type: String,
       required: [true, "Please enter user_id"],
     },
+    edit_user_id: {
+      type: String,
+      default: "",
+    },
     milestones: {
       type: [
         {

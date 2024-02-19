@@ -8,9 +8,8 @@ const SopCommentsActLog = (props) => {
       sx={{
         marginTop: "25px",
         marginRight: "25px",
-        marginBottom: "25px",
         padding: "16px",
-        minHeight: "95vh",
+        minHeight: "89vh",
         borderRadius: "40px",
       }}
     >

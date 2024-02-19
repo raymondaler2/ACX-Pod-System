@@ -2,11 +2,10 @@ import { Box, Button, IconButton } from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import Divider from "@mui/material/Divider";
-import { useState } from "react";
 import CreateSop from "./CreateSop.jsx";
 
-const CreateFilterButton = () => {
-  const [createClicked, setCreateClicked] = useState(false);
+const CreateFilterButton = (props) => {
+  const { createClicked, setCreateClicked } = props;
 
   const handleCreateClick = () => {
     setCreateClicked(true);

@@ -1,4 +1,4 @@
-import { Box, Grid, Card, Divider } from "@mui/material";
+import { Box, Grid, Card, Divider, CircularProgress } from "@mui/material";
 import { Str } from "@supercharge/strings";
 import ButtonBase from "@mui/material/ButtonBase";
 import { Link } from "react-router-dom";
@@ -10,7 +10,7 @@ import axios from "axios";
 
 const SopCard = (props) => {
   const { sop } = props;
-  const [userData, setUserData] = useState([]);
+  const [userData, setUserData] = useState({});
   const dateObject = new Date(sop?.createdAt);
   const options = { year: "numeric", month: "long", day: "numeric" };
   const formattedDate = new Intl.DateTimeFormat("en-US", options).format(
@@ -29,6 +29,18 @@ const SopCard = (props) => {
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    if (Object.keys(userData).length === 0) {
+      const intervalId = setInterval(() => {
+        if (Object.keys(userData).length === 0) {
+          fetchUser();
+        }
+      }, 5000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [userData]);
+
   return (
     <Grid item xs={2.4}>
       <ButtonBase>
@@ -37,6 +49,7 @@ const SopCard = (props) => {
             sx={{
               height: "350px",
               width: "90%",
+              minWidth: "280px",
               borderRadius: "20px",
               padding: "40px",
               backgroundColor: (theme) =>
@@ -53,6 +66,7 @@ const SopCard = (props) => {
                 display: "flex",
                 alignItems: "center",
                 width: "fit-content",
+                minHeight: "48px",
               }}
             >
               <h1 className="text-left text-[16px] font-bold">
@@ -111,7 +125,15 @@ const SopCard = (props) => {
                     width: "fit-content",
                   }}
                 >
-                  <p className="text-[9px] mr-2">{`${userData?.work_email}`}</p>
+                  <p className="text-[9px] mr-2">
+                    {Object.keys(userData).length === 0 ? (
+                      <CircularProgress size={10} />
+                    ) : (
+                      Str(`${userData?.first_name} ${userData?.last_name}`)
+                        .limit(10, " ...")
+                        .get()
+                    )}
+                  </p>
                   <Divider orientation="vertical" variant="middle" flexItem />
                   <p className="text-[9px]">|</p>
                   <p className="text-[9px] ml-2">{formattedDate}</p>

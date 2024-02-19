@@ -3,8 +3,8 @@ import { Box, Button } from "@mui/material";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import CreateUser from "./CreateUser.jsx";
 
-function CreateButtonUsers() {
-  const [createClicked, setCreateClicked] = useState(false);
+function CreateButtonUsers(props) {
+  const { createClicked, setCreateClicked } = props;
 
   const handleCreateClick = () => {
     setCreateClicked(true);

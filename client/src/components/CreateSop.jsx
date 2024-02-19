@@ -699,7 +699,7 @@ const CreateSop = (props) => {
           }}
           severity="success"
         >
-          SOP Created
+          Operation complete. SOP successfully created.
         </MuiAlert>
       </Snackbar>
     </>

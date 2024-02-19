@@ -18,6 +18,8 @@ import {
   Input,
   Snackbar,
   Alert as MuiAlert,
+  LinearProgress,
+  FormHelperText,
 } from "@mui/material";
 import axios from "axios";
 import { createFilterOptions } from "@mui/material/Autocomplete";
@@ -35,32 +37,62 @@ const CreateUser = (props) => {
   const filter = createFilterOptions();
   const { createClicked, handleClose, handleCreateClick } = props;
   const [firstName, setFirstName] = useState("");
+  const [firstNameError, setFirstNameError] = useState("");
   const [lastName, setLastName] = useState("");
+  const [lastNameError, setLastNameError] = useState("");
   const [address, setAddress] = useState("");
+  const [addressError, setAddressError] = useState("");
   const [birthday, setBirthday] = useState(null);
+  const [birthdayError, setBirthdayError] = useState(null);
   const [gender, setGender] = useState("");
+  const [genderError, setGenderError] = useState("");
   const [email, setEmail] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [contactNumber, setContactNumber] = useState("+63");
+  const [contactNumberError, setContactNumberError] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
-  const [emergencyNumber, setEmergencyNumber] = useState("");
+  const [emergencyContactError, setEmergencyContactError] = useState("");
+  const [emergencyNumber, setEmergencyNumber] = useState("+63");
+  const [emergencyNumberError, setEmergencyNumberError] = useState("");
   const [relationship, setRelationship] = useState("");
+  const [relationshipError, setRelationshipError] = useState("");
   const [relationshipOptions, setRelationshipOptions] = useState([]);
   const [createClickedTwo, setCreateClickedTwo] = useState(false);
   const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState("");
   const [position, setPosition] = useState("");
+  const [positionError, setPositionError] = useState("");
   const [positionOptions, setPositionOptions] = useState([]);
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("");
+  const [roleError, setRoleError] = useState("");
   const [roleOptions, setRoleOptions] = useState([]);
-  const [employeeNumber, setEmployeeNumber] = useState("ACX-00-000");
+  const [employeeNumber, setEmployeeNumber] = useState("ACX-");
+  const [employeeNumberError, setEmployeeNumberError] = useState("");
   const [philhealth, setphilhealth] = useState("");
+  const [philhealthError, setphilhealthError] = useState("");
   const [pagibig, setPagibig] = useState("");
+  const [pagibigError, setPagibigError] = useState("");
   const [tinnumber, setTinnumber] = useState("");
+  const [tinnumberError, setTinnumberError] = useState("");
   const [nbiClearanceFile, setNbiClearanceFile] = useState(null);
+  const [nbiClearanceFileError, setNbiClearanceFileError] = useState("");
   const [resumeCvFile, setResumeCvFile] = useState(null);
+  const [resumeCvFilError, setResumeCvFileError] = useState("");
   const [portfolioFile, setPortfolioFile] = useState(null);
+  const [portfolioFileError, setPortfolioFileError] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const customDialogStyles = {
+    borderRadius: "40px",
+    padding: "10px",
+    minWidth: "80rem",
+  };
 
   const dateObject = birthday instanceof dayjs ? birthday?.toDate() : null;
 
@@ -76,86 +108,170 @@ const CreateUser = (props) => {
     setFile(null);
   };
 
-  const handleFileChange = (event, setFile) => {
+  const handleFileChange = (event, setFile, setError, filename) => {
     const selectedFile = event.target.files[0];
-    setFile(selectedFile);
+
+    if (selectedFile && selectedFile.type === "application/pdf") {
+      const containsFilename = selectedFile.name.includes(filename);
+      const isFirstLetterCapital = /^[A-Z]/.test(selectedFile.name);
+
+      if (containsFilename && isFirstLetterCapital) {
+        setFile(selectedFile);
+        setError("");
+      } else {
+        handleSnackbar(
+          true,
+          "error",
+          `Please select a PDF file with the filename format: Surname_${filename}.`
+        );
+        event.target.value = null;
+      }
+    } else {
+      handleSnackbar(true, "error", "Please select a PDF file to proceed.");
+      event.target.value = null;
+    }
   };
 
-  const handlePhilhealth = (e) => {
-    setphilhealth(e.target.value);
+  const onChangeHandler = (e, set, errorSet) => {
+    errorSet("");
+    set(e.target.value);
   };
 
-  const handlePagibigChange = (e) => {
-    setPagibig(e.target.value);
+  const handleKeyDown = (e) => {
+    if (e.key === "-" && e.target.selectionStart === e.target.selectionEnd) {
+      e.preventDefault();
+    }
   };
 
-  const handleTinnumberChange = (e) => {
-    setTinnumber(e.target.value);
-  };
+  const onChangeNumberHandler = (e, set, type, gov, setError) => {
+    setError("");
+    switch (type) {
+      case "acx": {
+        let input = e.target.value.replace(/[^\dACX-]/g, "");
 
-  const handleFirstNameChange = (e) => {
-    setFirstName(e.target.value);
-  };
+        if (!input.startsWith("ACX-")) {
+          input = "ACX-" + input.slice(3);
+        }
 
-  const handleLastNameChange = (e) => {
-    setLastName(e.target.value);
-  };
+        if (input.length <= 10) {
+          const dashCount = (input.match(/\-/g) || []).length;
 
-  const handleAddressChange = (e) => {
-    setAddress(e.target.value);
+          if (dashCount > 2) {
+            input = input.slice(0, input.lastIndexOf("-"));
+          }
+
+          if (
+            input.length === 6 &&
+            input.charAt(5) !== "-" &&
+            e.nativeEvent.inputType !== "deleteContentBackward"
+          ) {
+            input += "-";
+          }
+
+          set(input);
+        }
+
+        break;
+      }
+      case "gov": {
+        let input = e.target.value.replace(/[^\d-]/g, "");
+
+        switch (gov) {
+          case "philhealth": {
+            input = input.replace(/(\d{4}(?=\d))/g, "$1-");
+            input = input.replace(/-$/, "");
+            if (input.length <= 14) {
+              set(input);
+            }
+
+            break;
+          }
+          case "pagibig": {
+            input = input.replace(/(\d{4}(?=\d))/g, "$1-");
+            input = input.replace(/-$/, "");
+            if (input.length <= 14) {
+              set(input);
+            }
+
+            break;
+          }
+          case "tinnumber": {
+            input = input.replace(/(\d{3}(?=\d))/g, "$1-");
+            input = input.replace(/-$/, "");
+            if (input.length <= 15) {
+              set(input);
+            }
+
+            break;
+          }
+        }
+
+        break;
+      }
+      case "phone": {
+        let input = e.target.value.replace(/[^\d+]/g, "");
+
+        if (!input.startsWith("+63")) {
+          input = "+63" + input.slice(3);
+        }
+
+        if (input.length <= 13) {
+          const plusCount = (input.match(/\+/g) || []).length;
+
+          if (plusCount > 1) {
+            input = input.slice(0, input.lastIndexOf("+"));
+          }
+
+          set(input);
+        }
+
+        break;
+      }
+    }
   };
 
   const handleBirthdayChange = (date) => {
     setBirthday(date);
   };
 
-  const handleGenderChange = (e) => {
-    setGender(e.target.value);
-  };
-
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-  };
-
-  const handleContactNumberChange = (e) => {
-    const input = e.target.value.replace(/\D/g, "");
-    setContactNumber(input);
-  };
-
-  const handleEmergencyContactChange = (e) => {
-    setEmergencyContact(e.target.value);
-  };
-
-  const handleEmergencyNumberChange = (e) => {
-    const input = e.target.value.replace(/\D/g, "");
-    setEmergencyNumber(input);
-  };
-
-  const handleUsernameChange = (e) => {
-    setUsername(e.target.value);
-  };
-
-  const handleEmployeeNumberChange = (e) => {
-    setEmployeeNumber(e.target.value);
-  };
-
   const clearData = () => {
+    setUsernameError("");
+    setPasswordError("");
+    setPositionError("");
+    setRoleError("");
+    setEmployeeNumberError("");
+    setphilhealthError("");
+    setPagibigError("");
+    setTinnumberError("");
+    setNbiClearanceFileError("");
+    setResumeCvFileError("");
+    setPortfolioFileError("");
+    setFirstNameError("");
+    setLastNameError("");
+    setAddressError("");
+    setBirthdayError("");
+    setGenderError("");
+    setEmailError("");
+    setContactNumberError("");
+    setEmergencyContactError("");
+    setEmergencyNumberError("");
+    setRelationshipError("");
     setFirstName("");
     setLastName("");
     setAddress("");
     setBirthday(null);
     setGender("");
     setEmail("");
-    setContactNumber("");
+    setContactNumber("+63");
     setEmergencyContact("");
-    setEmergencyNumber("");
+    setEmergencyNumber("+63");
     setRelationship("");
     setUsername("");
     setPosition("");
     setPassword("");
     setShowPassword(false);
     setRole("");
-    setEmployeeNumber("ACX-00-000");
+    setEmployeeNumber("ACX-");
     setphilhealth("");
     setPagibig("");
     setTinnumber("");
@@ -174,14 +290,323 @@ const CreateUser = (props) => {
     setCreateClickedTwo(false);
   };
 
+  const notEmpty = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+    setDataError("");
+    return true;
+  };
+
+  const phoneNotEmpty = (data, field, setDataError) => {
+    if (data === "+63") {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+    setDataError("");
+    return true;
+  };
+
+  const isValidName = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const nameRegex = /^[a-zA-Z\s'-]+$/;
+
+    if (!nameRegex.test(data)) {
+      setDataError(
+        `${field} should only contain letters, spaces, apostrophes, and hyphens`
+      );
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidAddress = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const addressRegex = /^[a-zA-Z0-9\s',.-]+$/;
+
+    if (!addressRegex.test(data)) {
+      setDataError(
+        `${field} should only contain letters, numbers, spaces, commas, apostrophes, periods, and hyphens`
+      );
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidDate = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const dateObject = new Date(data);
+
+    if (isNaN(dateObject.getTime())) {
+      setDataError(`${field} is not a valid date`);
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidEmail = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(data)) {
+      setDataError(`${field} is not a valid email address`);
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidPhone = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const numericData = data.replace(/\D/g, "");
+    if (numericData.length !== 12) {
+      setDataError(`${field} is not a valid phone number`);
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidSelection = (data, field, setDataError) => {
+    if (!data || typeof data !== "string") {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const textRegex = /^[a-zA-Z\s]+$/;
+
+    if (!textRegex.test(data)) {
+      setDataError(`${field} should only contain letters and spaces`);
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const validatePageOne = () => {
+    const firstNameValid =
+      notEmpty(firstName, "First Name", setFirstNameError) &&
+      isValidName(firstName, "First Name", setFirstNameError);
+    const lastNameValid =
+      notEmpty(lastName, "Last Name", setLastNameError) &&
+      isValidName(lastName, "Last Name", setLastNameError);
+    const addressValid =
+      notEmpty(address, "Address", setAddressError) &&
+      isValidAddress(address, "Address", setAddressError);
+    const birthdayValid =
+      notEmpty(birthday, "Birthday", setBirthdayError) &&
+      isValidDate(birthday?.$d, "Birthday", setBirthdayError);
+    const genderValid = notEmpty(gender, "Gender", setGenderError);
+    const emailValid =
+      notEmpty(email, "Email Address", setEmailError) &&
+      isValidEmail(email, "Email Address", setEmailError);
+    const contactNumbervalid =
+      phoneNotEmpty(contactNumber, "Contact Number", setContactNumberError) &&
+      isValidPhone(contactNumber, "Contact Number", setContactNumberError);
+    const emergencyContactValid =
+      notEmpty(
+        emergencyContact,
+        "Emergency Contact",
+        setEmergencyContactError
+      ) &&
+      isValidName(
+        emergencyContact,
+        "Emergency Contact",
+        setEmergencyContactError
+      );
+    const emergencyNumberValid =
+      phoneNotEmpty(
+        emergencyNumber,
+        "Contact Number",
+        setEmergencyNumberError
+      ) &&
+      isValidPhone(emergencyNumber, "Contact Number", setEmergencyNumberError);
+    const relationshipErrorValid =
+      notEmpty(relationship, "Relationship", setRelationshipError) &&
+      isValidSelection(relationship, "Relationship", setRelationshipError);
+
+    if (
+      firstNameValid &&
+      lastNameValid &&
+      addressValid &&
+      birthdayValid &&
+      genderValid &&
+      emailValid &&
+      contactNumbervalid &&
+      emergencyContactValid &&
+      emergencyNumberValid &&
+      relationshipErrorValid
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  const employeeNumberValidate = () => {
+    if (employeeNumber === "ACX-") {
+      setEmployeeNumberError("Employee Number is Required");
+      return false;
+    }
+    if (employeeNumber?.length !== 10) {
+      setEmployeeNumberError("Employee Number is not a valid employee number");
+      return false;
+    }
+    setEmployeeNumberError("");
+    return true;
+  };
+
+  const isValidUsername = (data, field, setDataError) => {
+    if (!data || typeof data !== "string") {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const usernameRegex = /^[a-zA-Z0-9_-]+$/;
+
+    if (!usernameRegex.test(data)) {
+      setDataError(
+        `${field} should only contain letters, numbers, underscores, and hyphens`
+      );
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidGovNumber = (data, field, setDataError) => {
+    if (field === "Philhealth" || field === "PAG-IBIG") {
+      if (data?.length !== 14) {
+        setDataError(`${field} number is not valid`);
+        return false;
+      }
+      setDataError("");
+      return true;
+    }
+    if (field === "Tin Number") {
+      if (data?.length !== 15) {
+        setDataError(`${field} number is not valid`);
+        return false;
+      }
+      setDataError("");
+      return true;
+    }
+  };
+
+  const ValidatePageTwo = () => {
+    const usernameValid =
+      notEmpty(username, "Username", setUsernameError) &&
+      isValidUsername(username, "Username", setUsernameError);
+    const passwordValid = notEmpty(password, "Password", setPasswordError);
+    const positionValid =
+      notEmpty(position, "Position", setPositionError) &&
+      isValidSelection(position, "Position", setPositionError);
+    const roleValid =
+      notEmpty(role, "Role", setRoleError) &&
+      isValidSelection(role, "Role", setRoleError);
+    const employeeNumberValid = employeeNumberValidate();
+
+    const philhealthValid =
+      notEmpty(philhealth, "Philhealth", setphilhealthError) &&
+      isValidGovNumber(philhealth, "Philhealth", setphilhealthError);
+    const pagibigValid =
+      notEmpty(pagibig, "PAG-IBIG", setPagibigError) &&
+      isValidGovNumber(pagibig, "PAG-IBIG", setPagibigError);
+    const tinnumberValid =
+      notEmpty(tinnumber, "Tin Number", setTinnumberError) &&
+      isValidGovNumber(tinnumber, "Tin Number", setTinnumberError);
+    const nbiClearanceFileValid = notEmpty(
+      nbiClearanceFile,
+      "NBI Clearance",
+      setNbiClearanceFileError
+    );
+    const resumeCvFileValid = notEmpty(
+      resumeCvFile,
+      "Resume / CV",
+      setResumeCvFileError
+    );
+    const portfolioFileValid = notEmpty(
+      portfolioFile,
+      "Portfolio",
+      setPortfolioFileError
+    );
+
+    if (
+      usernameValid &&
+      passwordValid &&
+      positionValid &&
+      roleValid &&
+      employeeNumberValid &&
+      philhealthValid &&
+      pagibigValid &&
+      tinnumberValid &&
+      nbiClearanceFileValid &&
+      resumeCvFileValid &&
+      portfolioFileValid
+    ) {
+      return true;
+    }
+    return false;
+  };
+
   const handleNext = () => {
+    const passed = validatePageOne();
+
+    if (!passed) {
+      handleSnackbar(
+        true,
+        "error",
+        "Please provide information in all fields."
+      );
+      return;
+    }
     setCreateClickedTwo(true);
     handleClose();
   };
 
   const handleCreateUser = async () => {
-    const site = import.meta.env.VITE_SITE;
-    const result = await axios.post(`http://${site}:3000/api/user`, {
+    const passed = ValidatePageTwo();
+    if (!passed) {
+      handleSnackbar(
+        true,
+        "error",
+        "Please provide information in all fields."
+      );
+      return;
+    }
+    const formData = new FormData();
+
+    const userData = {
       first_name: firstName,
       last_name: lastName,
       address,
@@ -200,23 +625,48 @@ const CreateUser = (props) => {
       philhealth,
       pagibig,
       tin_number: tinnumber,
-      nbi_clearance: nbiClearanceFile,
-      resume_cv: resumeCvFile,
-      portfolio: portfolioFile,
       pod_designation: "Edda POD",
+    };
+    const userDataBlob = new Blob([JSON.stringify(userData)], {
+      type: "application/json",
     });
-    if (result.status === 200) {
-      setSnackbarOpen(true);
+    formData.append("user_data", userDataBlob, "user_data.json");
+
+    formData.append("nbi_clearance", nbiClearanceFile);
+    formData.append("resume_cv", resumeCvFile);
+    formData.append("portfolio", portfolioFile);
+
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    };
+
+    try {
+      const site = import.meta.env.VITE_SITE;
+      const promise = axios.post(
+        `http://${site}:3000/api/user`,
+        formData,
+        config
+      );
+      setIsLoading(true);
+      const result = await promise;
+
+      if (result.status === 200) {
+        setIsLoading(false);
+        handleSnackbar(
+          true,
+          "success",
+          "Operation complete. User successfully created."
+        );
+      }
+    } catch (error) {
+      console.error("Error creating user:", error.message);
     }
   };
 
-  const customDialogStyles = {
-    borderRadius: "40px",
-    padding: "10px",
-    minWidth: "80rem",
-  };
-
   const generateRandomPassword = () => {
+    setPasswordError("");
     const uppercaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const lowercaseLetters = "abcdefghijklmnopqrstuvwxyz";
     const specialCharacters = '!@#$%^&*()-_=+[{]}|;:",<.>/?';
@@ -274,6 +724,16 @@ const CreateUser = (props) => {
     setRoleOptions(formattedRoles);
   };
 
+  const handleSnackbar = (open, severity, message) => {
+    if (open === true) {
+      setSnackbarOpen(open);
+      setSnackbarSeverity(severity);
+      setSnackbarMessage(message);
+    } else {
+      setSnackbarOpen(open);
+    }
+  };
+
   useEffect(() => {
     fetchRelationships();
     fetchOptions();
@@ -319,12 +779,17 @@ const CreateUser = (props) => {
                   First Name
                 </InputLabel>
                 <TextField
+                  error={!!firstNameError}
+                  helperText={firstNameError}
+                  disabled={isLoading}
                   fullWidth
                   id="first-name"
                   variant="outlined"
                   label="First Name"
                   value={firstName}
-                  onChange={handleFirstNameChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setFirstName, setFirstNameError);
+                  }}
                 />
                 <InputLabel
                   htmlFor="address"
@@ -337,12 +802,17 @@ const CreateUser = (props) => {
                   Address
                 </InputLabel>
                 <TextField
+                  error={!!addressError}
+                  helperText={addressError}
+                  disabled={isLoading}
                   fullWidth
                   id="address"
                   variant="outlined"
                   label="Address"
                   value={address}
-                  onChange={handleAddressChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setAddress, setAddressError);
+                  }}
                 />
                 <InputLabel
                   htmlFor="email-address"
@@ -355,12 +825,17 @@ const CreateUser = (props) => {
                   Email Address
                 </InputLabel>
                 <TextField
+                  error={!!emailError}
+                  helperText={emailError}
+                  disabled={isLoading}
                   fullWidth
                   id="email-address"
                   variant="outlined"
                   label="Email Address"
                   value={email}
-                  onChange={handleEmailChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setEmail, setEmailError);
+                  }}
                 />
               </Stack>
             </Grid>
@@ -376,12 +851,17 @@ const CreateUser = (props) => {
                   Last Name
                 </InputLabel>
                 <TextField
+                  error={!!lastNameError}
+                  helperText={lastNameError}
+                  disabled={isLoading}
                   fullWidth
                   id="last-name"
                   variant="outlined"
                   label="Last Name"
                   value={lastName}
-                  onChange={handleLastNameChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setLastName, setLastNameError);
+                  }}
                 />
                 <Stack direction="row">
                   <Grid container spacing={2}>
@@ -397,20 +877,26 @@ const CreateUser = (props) => {
                         >
                           Birthday
                         </InputLabel>
-                        <LocalizationProvider
-                          dateAdapter={AdapterDayjs}
-                          fullWidth
-                        >
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
                           <DatePicker
+                            disabled={isLoading}
                             label="MM/DD/YYYY"
                             fullWidth
                             value={birthday}
                             slotProps={{
                               field: { clearable: true },
+                              textField: {
+                                error: !!birthdayError,
+                                helperText: birthdayError,
+                              },
                             }}
-                            onChange={(newValue) =>
-                              handleBirthdayChange(newValue)
-                            }
+                            renderInput={(params) => {
+                              <TextField {...params} />;
+                            }}
+                            onChange={(newValue) => {
+                              handleBirthdayChange(newValue);
+                              setBirthdayError("");
+                            }}
                           />
                         </LocalizationProvider>
                       </Stack>
@@ -427,18 +913,26 @@ const CreateUser = (props) => {
                         >
                           Gender
                         </InputLabel>
-                        <FormControl fullWidth variant="outlined">
+                        <FormControl
+                          fullWidth
+                          variant="outlined"
+                          error={!!genderError}
+                        >
                           <InputLabel id="gender-label">Gender</InputLabel>
                           <Select
+                            disabled={isLoading}
                             abelId="gender-label"
                             id="gender"
                             value={gender}
-                            onChange={handleGenderChange}
+                            onChange={(e) => {
+                              onChangeHandler(e, setGender, setGenderError);
+                            }}
                             label="Gender"
                           >
                             <MenuItem value="Male">Male</MenuItem>
                             <MenuItem value="Female">Female</MenuItem>
                           </Select>
+                          <FormHelperText>{genderError}</FormHelperText>
                         </FormControl>
                       </Stack>
                     </Grid>
@@ -455,12 +949,23 @@ const CreateUser = (props) => {
                   Contact Number
                 </InputLabel>
                 <TextField
+                  error={!!contactNumberError}
+                  helperText={contactNumberError}
+                  disabled={isLoading}
                   fullWidth
                   id="contact-number"
                   variant="outlined"
                   label="Enter Number"
                   value={contactNumber}
-                  onChange={handleContactNumberChange}
+                  onChange={(e) => {
+                    onChangeNumberHandler(
+                      e,
+                      setContactNumber,
+                      "phone",
+                      "",
+                      setContactNumberError
+                    );
+                  }}
                 />
               </Stack>
             </Grid>
@@ -481,12 +986,21 @@ const CreateUser = (props) => {
                 Emergency Contact
               </InputLabel>
               <TextField
+                error={!!emergencyContactError}
+                helperText={emergencyContactError}
+                disabled={isLoading}
                 fullWidth
                 id="first-name"
                 variant="outlined"
                 label="Enter Full Name"
                 value={emergencyContact}
-                onChange={handleEmergencyContactChange}
+                onChange={(e) => {
+                  onChangeHandler(
+                    e,
+                    setEmergencyContact,
+                    setEmergencyContactError
+                  );
+                }}
               />
             </Grid>
             <Grid item xs={6}>
@@ -500,12 +1014,22 @@ const CreateUser = (props) => {
                 Contact Number
               </InputLabel>
               <TextField
+                error={!!emergencyNumberError}
+                helperText={emergencyNumberError}
                 fullWidth
                 id="emergency-number"
                 variant="outlined"
-                label="Emergency Number"
+                label="Enter Number"
                 value={emergencyNumber}
-                onChange={handleEmergencyNumberChange}
+                onChange={(e) => {
+                  onChangeNumberHandler(
+                    e,
+                    setEmergencyNumber,
+                    "phone",
+                    "",
+                    setEmergencyNumberError
+                  );
+                }}
               />
             </Grid>
             <Grid item xs={6}>
@@ -519,6 +1043,7 @@ const CreateUser = (props) => {
                 Relationship
               </InputLabel>
               <Autocomplete
+                disabled={isLoading}
                 selectOnFocus
                 clearOnBlur
                 handleHomeEndKeys
@@ -526,6 +1051,7 @@ const CreateUser = (props) => {
                 fullWidth
                 value={relationship}
                 onChange={(event, newValue) => {
+                  setRelationshipError("");
                   if (newValue && newValue.label.startsWith('Add "')) {
                     const extractedValue = newValue.label
                       .replace('Add "', "")
@@ -559,6 +1085,8 @@ const CreateUser = (props) => {
                     label="Relationship"
                     variant="outlined"
                     fullWidth
+                    error={!!relationshipError}
+                    helperText={relationshipError}
                   />
                 )}
                 renderOption={(props, option) => (
@@ -576,6 +1104,7 @@ const CreateUser = (props) => {
           }}
         >
           <Button
+            disabled={isLoading}
             onClick={handleNext}
             variant="contained"
             sx={{
@@ -666,12 +1195,17 @@ const CreateUser = (props) => {
                       Username
                     </InputLabel>
                     <TextField
+                      error={!!usernameError}
+                      helperText={usernameError}
+                      disabled={isLoading}
                       fullWidth
                       id="user-name"
                       variant="outlined"
                       label="Username"
                       value={username}
-                      onChange={handleUsernameChange}
+                      onChange={(e) => {
+                        onChangeHandler(e, setUsername, setUsernameError);
+                      }}
                     />
                     <InputLabel
                       htmlFor="password"
@@ -684,13 +1218,18 @@ const CreateUser = (props) => {
                       Password
                     </InputLabel>
                     <TextField
+                      error={!!passwordError}
+                      helperText={passwordError}
+                      disabled={isLoading}
                       id="password"
                       label="Password"
                       variant="outlined"
                       fullWidth
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        onChangeHandler(e, setPassword, setPasswordError);
+                      }}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -709,6 +1248,7 @@ const CreateUser = (props) => {
                       }}
                     />
                     <Button
+                      disabled={isLoading}
                       sx={{
                         alignSelf: "flex-start",
                         marginTop: "35px",
@@ -739,6 +1279,7 @@ const CreateUser = (props) => {
                       Position
                     </InputLabel>
                     <Autocomplete
+                      disabled={isLoading}
                       selectOnFocus
                       clearOnBlur
                       handleHomeEndKeys
@@ -746,6 +1287,7 @@ const CreateUser = (props) => {
                       fullWidth
                       value={position}
                       onChange={(event, newValue) => {
+                        setPositionError("");
                         if (newValue && newValue.label.startsWith('Add "')) {
                           const extractedValue = newValue.label
                             .replace('Add "', "")
@@ -779,6 +1321,8 @@ const CreateUser = (props) => {
                           label="Position"
                           variant="outlined"
                           fullWidth
+                          error={!!positionError}
+                          helperText={positionError}
                         />
                       )}
                       renderOption={(props, option) => (
@@ -796,6 +1340,7 @@ const CreateUser = (props) => {
                       Role
                     </InputLabel>
                     <Autocomplete
+                      disabled={isLoading}
                       selectOnFocus
                       clearOnBlur
                       handleHomeEndKeys
@@ -803,6 +1348,7 @@ const CreateUser = (props) => {
                       fullWidth
                       value={role}
                       onChange={(event, newValue) => {
+                        setRoleError("");
                         if (newValue && newValue.label.startsWith('Add "')) {
                           const extractedValue = newValue.label
                             .replace('Add "', "")
@@ -836,6 +1382,8 @@ const CreateUser = (props) => {
                           label="Role"
                           variant="outlined"
                           fullWidth
+                          error={!!roleError}
+                          helperText={roleError}
                         />
                       )}
                       renderOption={(props, option) => (
@@ -861,12 +1409,24 @@ const CreateUser = (props) => {
                         Employee Number
                       </InputLabel>
                       <TextField
+                        error={!!employeeNumberError}
+                        helperText={employeeNumberError}
+                        onKeyDown={handleKeyDown}
+                        disabled={isLoading}
                         fullWidth
                         id="employee-number"
                         variant="outlined"
                         label="Employee Number"
                         value={employeeNumber}
-                        onChange={handleEmployeeNumberChange}
+                        onChange={(e) => {
+                          onChangeNumberHandler(
+                            e,
+                            setEmployeeNumber,
+                            "acx",
+                            "",
+                            setEmployeeNumberError
+                          );
+                        }}
                       />
                     </Stack>
                   </Stack>
@@ -891,12 +1451,23 @@ const CreateUser = (props) => {
                       Philhealth
                     </InputLabel>
                     <TextField
+                      error={!!philhealthError}
+                      helperText={philhealthError}
+                      disabled={isLoading}
                       fullWidth
                       id="philhealth"
                       variant="outlined"
                       label="Philhealth"
                       value={philhealth}
-                      onChange={handlePhilhealth}
+                      onChange={(e) => {
+                        onChangeNumberHandler(
+                          e,
+                          setphilhealth,
+                          "gov",
+                          "philhealth",
+                          setphilhealthError
+                        );
+                      }}
                     />
                     <InputLabel
                       htmlFor="pag-ibig"
@@ -909,12 +1480,23 @@ const CreateUser = (props) => {
                       PAG-IBIG
                     </InputLabel>
                     <TextField
+                      error={!!pagibigError}
+                      helperText={pagibigError}
+                      disabled={isLoading}
                       fullWidth
                       id="pag-ibig"
                       variant="outlined"
                       label="PAG-IBIG"
                       value={pagibig}
-                      onChange={handlePagibigChange}
+                      onChange={(e) => {
+                        onChangeNumberHandler(
+                          e,
+                          setPagibig,
+                          "gov",
+                          "pagibig",
+                          setPagibigError
+                        );
+                      }}
                     />
                     <InputLabel
                       htmlFor="tin-number"
@@ -927,12 +1509,23 @@ const CreateUser = (props) => {
                       Tin Number
                     </InputLabel>
                     <TextField
+                      error={!!tinnumberError}
+                      helperText={tinnumberError}
+                      disabled={isLoading}
                       fullWidth
                       id="tin-number"
                       variant="outlined"
                       label="Tin Number"
                       value={tinnumber}
-                      onChange={handleTinnumberChange}
+                      onChange={(e) => {
+                        onChangeNumberHandler(
+                          e,
+                          setTinnumber,
+                          "gov",
+                          "tinnumber",
+                          setTinnumberError
+                        );
+                      }}
                     />
                   </Stack>
                 </Grid>
@@ -947,15 +1540,23 @@ const CreateUser = (props) => {
                     {nbiClearanceFile === null ? (
                       <>
                         <Input
+                          disabled={isLoading}
                           type="file"
                           id="nbi-clearance"
                           sx={{ display: "none" }}
                           onChange={(event) => {
-                            handleFileChange(event, setNbiClearanceFile);
+                            handleFileChange(
+                              event,
+                              setNbiClearanceFile,
+                              setNbiClearanceFileError,
+                              "acx_nbi_clearance"
+                            );
                           }}
                         />
                         <label htmlFor="nbi-clearance">
                           <Button
+                            color={nbiClearanceFileError ? "error" : "primary"}
+                            disabled={isLoading}
                             variant="outlined"
                             component="span"
                             startIcon={<UploadIcon />}
@@ -964,11 +1565,17 @@ const CreateUser = (props) => {
                             Upload
                           </Button>
                         </label>
+                        {nbiClearanceFileError && (
+                          <FormHelperText sx={{ color: "#d32f2f" }}>
+                            {nbiClearanceFileError}
+                          </FormHelperText>
+                        )}
                       </>
                     ) : (
                       <>
                         <label htmlFor="nbi-clearance-cancel">
                           <Button
+                            disabled={isLoading}
                             color="error"
                             variant="contained"
                             component="span"
@@ -996,15 +1603,23 @@ const CreateUser = (props) => {
                     {resumeCvFile === null ? (
                       <>
                         <Input
+                          disabled={isLoading}
                           type="file"
                           id="resume-cv"
                           sx={{ display: "none" }}
                           onChange={(event) =>
-                            handleFileChange(event, setResumeCvFile)
+                            handleFileChange(
+                              event,
+                              setResumeCvFile,
+                              setResumeCvFileError,
+                              "acx_resume"
+                            )
                           }
                         />
                         <label htmlFor="resume-cv">
                           <Button
+                            color={resumeCvFilError ? "error" : "primary"}
+                            disabled={isLoading}
                             variant="outlined"
                             component="span"
                             startIcon={<UploadIcon />}
@@ -1013,11 +1628,17 @@ const CreateUser = (props) => {
                             Upload
                           </Button>
                         </label>
+                        {resumeCvFilError && (
+                          <FormHelperText sx={{ color: "#d32f2f" }}>
+                            {resumeCvFilError}
+                          </FormHelperText>
+                        )}
                       </>
                     ) : (
                       <>
                         <label htmlFor="resume-cv-cancel">
                           <Button
+                            disabled={isLoading}
                             color="error"
                             variant="contained"
                             component="span"
@@ -1045,15 +1666,23 @@ const CreateUser = (props) => {
                     {portfolioFile === null ? (
                       <>
                         <Input
+                          disabled={isLoading}
                           type="file"
                           id="portfolio"
                           sx={{ display: "none" }}
                           onChange={(event) =>
-                            handleFileChange(event, setPortfolioFile)
+                            handleFileChange(
+                              event,
+                              setPortfolioFile,
+                              setPortfolioFileError,
+                              "acx_portfolio"
+                            )
                           }
                         />
                         <label htmlFor="portfolio">
                           <Button
+                            color={portfolioFileError ? "error" : "primary"}
+                            disabled={isLoading}
                             variant="outlined"
                             component="span"
                             startIcon={<UploadIcon />}
@@ -1062,11 +1691,17 @@ const CreateUser = (props) => {
                             Upload
                           </Button>
                         </label>
+                        {portfolioFileError && (
+                          <FormHelperText sx={{ color: "#d32f2f" }}>
+                            {portfolioFileError}
+                          </FormHelperText>
+                        )}
                       </>
                     ) : (
                       <>
                         <label htmlFor="portfolio-cancel">
                           <Button
+                            disabled={isLoading}
                             color="error"
                             variant="contained"
                             component="span"
@@ -1086,6 +1721,7 @@ const CreateUser = (props) => {
               </Grid>
             </Stack>
           </Stack>
+          {isLoading && <LinearProgress sx={{ marginTop: "20px" }} />}
         </DialogContent>
         <DialogActions
           sx={{
@@ -1095,6 +1731,7 @@ const CreateUser = (props) => {
           }}
         >
           <Button
+            disabled={isLoading}
             onClick={() => {
               handleCreateClick();
               setCreateClickedTwo(false);
@@ -1117,6 +1754,7 @@ const CreateUser = (props) => {
             Back
           </Button>
           <Button
+            disabled={isLoading}
             onClick={handleCreateUser}
             variant="contained"
             color="success"
@@ -1138,10 +1776,16 @@ const CreateUser = (props) => {
         open={snackbarOpen}
         autoHideDuration={1000}
         onClose={() => {
-          setSnackbarOpen(false);
-          clearData();
-          setCreateClickedTwo(false);
-          window.location.reload();
+          if (
+            snackbarMessage === "Operation complete. User successfully created."
+          ) {
+            handleSnackbar(false, "", "");
+            clearData();
+            setCreateClickedTwo(false);
+            window.location.reload();
+            return;
+          }
+          handleSnackbar(false, "", "");
         }}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         sx={{
@@ -1152,11 +1796,21 @@ const CreateUser = (props) => {
           elevation={6}
           variant="filled"
           onClose={() => {
-            setSnackbarOpen(false);
+            if (
+              snackbarMessage ===
+              "Operation complete. User successfully created."
+            ) {
+              handleSnackbar(false, "", "");
+              clearData();
+              setCreateClickedTwo(false);
+              window.location.reload();
+              return;
+            }
+            handleSnackbar(false, "", "");
           }}
-          severity="success"
+          severity={snackbarSeverity}
         >
-          User Created
+          {snackbarMessage}
         </MuiAlert>
       </Snackbar>
     </>

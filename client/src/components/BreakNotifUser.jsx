@@ -2,6 +2,8 @@ import { Avatar, Box, Button, IconButton } from "@mui/material";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import Divider from "@mui/material/Divider";
 import user from "./../assets/user.png";
+import { Link } from "react-router-dom";
+import UserProfile from "./../pages/UserProfile.jsx";
 
 const BreakNotifUser = () => {
   return (
@@ -40,11 +42,12 @@ const BreakNotifUser = () => {
           aria-label="filter"
           style={{
             marginLeft: "10px",
-            marginRight: "50px",
           }}
           onClick={() => {}}
         >
-          <Avatar alt="User" src={user} />
+          <Link to={`/UserProfile`}>
+            <Avatar alt="User" src={user} />
+          </Link>
         </IconButton>
       </Box>
     </Box>

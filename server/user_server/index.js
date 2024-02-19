@@ -1,5 +1,7 @@
 require("dotenv").config();
 const express = require("express");
+const bodyParser = require("body-parser");
+const multer = require("multer");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const userRoute = require("./view/user");
@@ -12,6 +14,8 @@ const MONGO_URL = process.env.MONGO_URL;
 
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
+app.use(multer().any());
 
 app.use("/api/user", userRoute);
 app.use("/api/userPosition", userPositionRoute);

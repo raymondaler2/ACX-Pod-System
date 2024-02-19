@@ -36,6 +36,9 @@ const EditSop = (props) => {
   const [sopTitle, setSopTitle] = useState("");
   const [sopServiceTag, setSopServiceTag] = useState("");
   const [sopDescription, setSopDescription] = useState("");
+  const [activeMilestone, setActiveMilestone] = useState(0);
+  const [milestoneDescription, setMilestoneDescription] = useState("");
+  const [checklistTitle, setChecklistTitle] = useState("");
   const [sopPageTwo, setSopPageTwo] = useState(false);
   const [sopMilestones, setSopMilestones] = useState([
     {
@@ -48,13 +51,10 @@ const EditSop = (props) => {
       ],
     },
   ]);
-  const [activeMilestone, setActiveMilestone] = useState(0);
-  const [milestoneDescription, setMilestoneDescription] = useState("");
-  const [checklistTitle, setChecklistTitle] = useState("");
 
   const handleSave = async () => {
     const sop = {
-      user_id: localStorage.getItem("_id"),
+      edit_user_id: localStorage.getItem("_id"),
       featured: sopFeatured,
       sop_title: sopTitle,
       service_tag: sopServiceTag.service_tag,
@@ -75,6 +75,7 @@ const EditSop = (props) => {
       sop
     );
     if (result.status === 200) {
+      handleClose();
       setSopPageTwo(false);
       setSnackbarOpen(true);
     }
@@ -713,7 +714,7 @@ const EditSop = (props) => {
           }}
           severity="success"
         >
-          SOP Edited
+          Operation complete. SOP successfully edited.
         </MuiAlert>
       </Snackbar>
     </>

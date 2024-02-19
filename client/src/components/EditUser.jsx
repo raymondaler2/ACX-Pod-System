@@ -18,8 +18,12 @@ import {
   Input,
   Snackbar,
   Alert as MuiAlert,
+  LinearProgress,
+  FormHelperText,
+  Menu,
 } from "@mui/material";
 import axios from "axios";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import { createFilterOptions } from "@mui/material/Autocomplete";
 import CloseIcon from "@mui/icons-material/Close";
 import { useEffect, useState } from "react";
@@ -27,49 +31,78 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import {
-  TroubleshootOutlined,
-  Visibility,
-  VisibilityOff,
-} from "@mui/icons-material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import UploadIcon from "@mui/icons-material/Upload";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 
 const EditUser = (props) => {
   const filter = createFilterOptions();
-  const { editClicked, handleClose, handleEditClick, selectedRow } = props;
+  const {
+    editClicked,
+    handleClose,
+    handleEditClick,
+    selectedRow,
+    setSelectedRow,
+  } = props;
   const [firstName, setFirstName] = useState("");
+  const [firstNameError, setFirstNameError] = useState("");
   const [lastName, setLastName] = useState("");
+  const [lastNameError, setLastNameError] = useState("");
   const [address, setAddress] = useState("");
+  const [addressError, setAddressError] = useState("");
   const [birthday, setBirthday] = useState(null);
+  const [birthdayError, setBirthdayError] = useState(null);
   const [gender, setGender] = useState("");
+  const [genderError, setGenderError] = useState("");
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [contactNumber, setContactNumber] = useState("");
+  const [contactNumberError, setContactNumberError] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
+  const [emergencyContactError, setEmergencyContactError] = useState("");
   const [emergencyNumber, setEmergencyNumber] = useState("");
+  const [emergencyNumberError, setEmergencyNumberError] = useState("");
   const [relationship, setRelationship] = useState("");
+  const [relationshipError, setRelationshipError] = useState("");
   const [relationshipOptions, setRelationshipOptions] = useState([]);
   const [editClickedTwo, setEditClickedTwo] = useState(false);
   const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState("");
   const [position, setPosition] = useState("");
+  const [positionError, setPositionError] = useState("");
   const [positionOptions, setPositionOptions] = useState([]);
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState("");
+  const [roleError, setRoleError] = useState("");
   const [roleOptions, setRoleOptions] = useState([]);
   const [employeeNumber, setEmployeeNumber] = useState("ACX-00-000");
+  const [employeeNumberError, setEmployeeNumberError] = useState("");
   const [philhealth, setphilhealth] = useState("");
+  const [philhealthError, setphilhealthError] = useState("");
   const [pagibig, setPagibig] = useState("");
+  const [pagibigError, setPagibigError] = useState("");
   const [tinnumber, setTinnumber] = useState("");
+  const [tinnumberError, setTinnumberError] = useState("");
   const [nbiClearanceFile, setNbiClearanceFile] = useState(null);
+  const [nbiClearanceFileError, setNbiClearanceFileError] = useState("");
   const [resumeCvFile, setResumeCvFile] = useState(null);
+  const [resumeCvFilError, setResumeCvFileError] = useState("");
   const [portfolioFile, setPortfolioFile] = useState(null);
+  const [portfolioFileError, setPortfolioFileError] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarOpenDeleted, setSnackbarOpenDeleted] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const [confirmEdit, setConfirmEdit] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [anchorElNbi, setAnchorElNbi] = useState(null);
+  const [anchorElResume, setAnchorElResume] = useState(null);
+  const [anchorElPortfolio, setAnchorElPortfolio] = useState(null);
 
   const dateObject = birthday instanceof dayjs ? birthday?.toDate() : null;
 
@@ -85,75 +118,172 @@ const EditUser = (props) => {
     setFile(null);
   };
 
-  const handleFileChange = (event, setFile) => {
+  const handleFileChange = (event, setFile, setError, filename) => {
     const selectedFile = event.target.files[0];
-    setFile(selectedFile);
+
+    if (selectedFile && selectedFile.type === "application/pdf") {
+      const containsFilename = selectedFile.name.includes(filename);
+      const isFirstLetterCapital = /^[A-Z]/.test(selectedFile.name);
+
+      if (containsFilename && isFirstLetterCapital) {
+        setFile(selectedFile);
+        setError("");
+      } else {
+        handleSnackbar(
+          true,
+          "error",
+          `Please select a PDF file with the filename format: Surname_${filename}.`
+        );
+        event.target.value = null;
+      }
+    } else {
+      handleSnackbar(true, "error", "Please select a PDF file to proceed.");
+      event.target.value = null;
+    }
   };
 
-  const handlePhilhealth = (e) => {
-    setphilhealth(e.target.value);
+  const onChangeHandler = (e, set, errorSet) => {
+    errorSet("");
+    set(e.target.value);
   };
 
-  const handlePagibigChange = (e) => {
-    setPagibig(e.target.value);
+  const handleKeyDown = (e) => {
+    if (e.key === "-" && e.target.selectionStart === e.target.selectionEnd) {
+      e.preventDefault();
+    }
   };
 
-  const handleTinnumberChange = (e) => {
-    setTinnumber(e.target.value);
-  };
+  const onChangeNumberHandler = (e, set, type, gov, setError) => {
+    setError("");
+    switch (type) {
+      case "acx": {
+        let input = e.target.value.replace(/[^\dACX-]/g, "");
 
-  const handleFirstNameChange = (e) => {
-    setFirstName(e.target.value);
-  };
+        if (!input.startsWith("ACX-")) {
+          input = "ACX-" + input.slice(3);
+        }
 
-  const handleLastNameChange = (e) => {
-    setLastName(e.target.value);
-  };
+        if (input.length <= 10) {
+          const dashCount = (input.match(/\-/g) || []).length;
 
-  const handleAddressChange = (e) => {
-    setAddress(e.target.value);
+          if (dashCount > 2) {
+            input = input.slice(0, input.lastIndexOf("-"));
+          }
+
+          if (
+            input.length === 6 &&
+            input.charAt(5) !== "-" &&
+            e.nativeEvent.inputType !== "deleteContentBackward"
+          ) {
+            input += "-";
+          }
+
+          set(input);
+        }
+
+        break;
+      }
+      case "gov": {
+        let input = e.target.value.replace(/[^\d-]/g, "");
+
+        switch (gov) {
+          case "philhealth": {
+            input = input.replace(/(\d{4}(?=\d))/g, "$1-");
+            input = input.replace(/-$/, "");
+            if (input.length <= 14) {
+              set(input);
+            }
+
+            break;
+          }
+          case "pagibig": {
+            input = input.replace(/(\d{4}(?=\d))/g, "$1-");
+            input = input.replace(/-$/, "");
+            if (input.length <= 14) {
+              set(input);
+            }
+
+            break;
+          }
+          case "tinnumber": {
+            input = input.replace(/(\d{3}(?=\d))/g, "$1-");
+            input = input.replace(/-$/, "");
+            if (input.length <= 15) {
+              set(input);
+            }
+
+            break;
+          }
+        }
+
+        break;
+      }
+      case "phone": {
+        let input = e.target.value.replace(/[^\d+]/g, "");
+
+        if (!input.startsWith("+63")) {
+          input = "+63" + input.slice(3);
+        }
+
+        if (input.length <= 13) {
+          const plusCount = (input.match(/\+/g) || []).length;
+
+          if (plusCount > 1) {
+            input = input.slice(0, input.lastIndexOf("+"));
+          }
+
+          set(input);
+        }
+
+        break;
+      }
+    }
   };
 
   const handleBirthdayChange = (date) => {
     setBirthday(date);
   };
 
-  const handleGenderChange = (e) => {
-    setGender(e.target.value);
-  };
-
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-  };
-
-  const handleContactNumberChange = (e) => {
-    const input = e.target.value.replace(/\D/g, "");
-    setContactNumber(input);
-  };
-
-  const handleEmergencyContactChange = (e) => {
-    setEmergencyContact(e.target.value);
-  };
-
-  const handleEmergencyNumberChange = (e) => {
-    const input = e.target.value.replace(/\D/g, "");
-    setEmergencyNumber(input);
-  };
-
-  const handleUsernameChange = (e) => {
-    setUsername(e.target.value);
-  };
-
-  const handleEmployeeNumberChange = (e) => {
-    setEmployeeNumber(e.target.value);
+  const clearData = () => {
+    setUsernameError("");
+    setPasswordError("");
+    setPositionError("");
+    setRoleError("");
+    setEmployeeNumberError("");
+    setphilhealthError("");
+    setPagibigError("");
+    setTinnumberError("");
+    setNbiClearanceFile(null);
+    setNbiClearanceFileError("");
+    setResumeCvFile(null);
+    setResumeCvFileError("");
+    setPortfolioFile(null);
+    setPortfolioFileError("");
+    setFirstNameError("");
+    setLastNameError("");
+    setAddressError("");
+    setBirthdayError("");
+    setGenderError("");
+    setEmailError("");
+    setContactNumberError("");
+    setEmergencyContactError("");
+    setEmergencyNumberError("");
+    setRelationshipError("");
   };
 
   const handleCancelclick = () => {
     handleClose();
+    clearData();
+    setGender(selectedRow?.gender);
+    setRelationship(selectedRow?.relationship.relationship);
+    setConfirmEdit(true);
+    setSelectedRow(null);
   };
 
   const handleCancelclickPageTwo = () => {
+    clearData();
     setEditClickedTwo(false);
+    setConfirmEdit(true);
   };
 
   const handleNext = () => {
@@ -170,17 +300,305 @@ const EditUser = (props) => {
   };
 
   const handleOnDelete = async () => {
+    setIsLoading(true);
     const site = import.meta.env.VITE_SITE;
     const result = await axios.delete(
       `http://${site}:3000/api/user/${selectedRow?._id}`
     );
 
     if (result.status === 200) {
-      setSnackbarOpenDeleted(true);
+      setIsLoading(false);
+      handleSnackbar(
+        true,
+        "success",
+        "Operation complete. User successfully deleted."
+      );
     }
   };
 
+  const notEmpty = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+    setDataError("");
+    return true;
+  };
+
+  const phoneNotEmpty = (data, field, setDataError) => {
+    if (data === "+63") {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+    setDataError("");
+    return true;
+  };
+
+  const isValidName = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const nameRegex = /^[a-zA-Z\s'-]+$/;
+
+    if (!nameRegex.test(data)) {
+      setDataError(
+        `${field} should only contain letters, spaces, apostrophes, and hyphens`
+      );
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidAddress = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const addressRegex = /^[a-zA-Z0-9\s',.-]+$/;
+
+    if (!addressRegex.test(data)) {
+      setDataError(
+        `${field} should only contain letters, numbers, spaces, commas, apostrophes, periods, and hyphens`
+      );
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidDate = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const dateObject = new Date(data);
+
+    if (isNaN(dateObject.getTime())) {
+      setDataError(`${field} is not a valid date`);
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidEmail = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(data)) {
+      setDataError(`${field} is not a valid email address`);
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidPhone = (data, field, setDataError) => {
+    if (!data) {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const numericData = data.replace(/\D/g, "");
+    if (numericData.length !== 12) {
+      setDataError(`${field} is not a valid phone number`);
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidSelection = (data, field, setDataError) => {
+    if (!data || typeof data !== "string") {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const textRegex = /^[a-zA-Z\s]+$/;
+
+    if (!textRegex.test(data)) {
+      setDataError(`${field} should only contain letters and spaces`);
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const validatePageOne = () => {
+    const firstNameValid =
+      notEmpty(firstName, "First Name", setFirstNameError) &&
+      isValidName(firstName, "First Name", setFirstNameError);
+    const lastNameValid =
+      notEmpty(lastName, "Last Name", setLastNameError) &&
+      isValidName(lastName, "Last Name", setLastNameError);
+    const addressValid =
+      notEmpty(address, "Address", setAddressError) &&
+      isValidAddress(address, "Address", setAddressError);
+    const birthdayValid =
+      notEmpty(birthday, "Birthday", setBirthdayError) &&
+      isValidDate(birthday?.$d, "Birthday", setBirthdayError);
+    const genderValid = notEmpty(gender, "Gender", setGenderError);
+    const emailValid =
+      notEmpty(email, "Email Address", setEmailError) &&
+      isValidEmail(email, "Email Address", setEmailError);
+    const contactNumbervalid =
+      phoneNotEmpty(contactNumber, "Contact Number", setContactNumberError) &&
+      isValidPhone(contactNumber, "Contact Number", setContactNumberError);
+    const emergencyContactValid =
+      notEmpty(
+        emergencyContact,
+        "Emergency Contact",
+        setEmergencyContactError
+      ) &&
+      isValidName(
+        emergencyContact,
+        "Emergency Contact",
+        setEmergencyContactError
+      );
+    const emergencyNumberValid =
+      phoneNotEmpty(
+        emergencyNumber,
+        "Contact Number",
+        setEmergencyNumberError
+      ) &&
+      isValidPhone(emergencyNumber, "Contact Number", setEmergencyNumberError);
+    const relationshipErrorValid =
+      notEmpty(relationship, "Relationship", setRelationshipError) &&
+      isValidSelection(relationship, "Relationship", setRelationshipError);
+
+    if (
+      firstNameValid &&
+      lastNameValid &&
+      addressValid &&
+      birthdayValid &&
+      genderValid &&
+      emailValid &&
+      contactNumbervalid &&
+      emergencyContactValid &&
+      emergencyNumberValid &&
+      relationshipErrorValid
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  const employeeNumberValidate = () => {
+    if (employeeNumber === "ACX-") {
+      setEmployeeNumberError("Employee Number is Required");
+      return false;
+    }
+    if (employeeNumber?.length !== 10) {
+      setEmployeeNumberError("Employee Number is not a valid employee number");
+      return false;
+    }
+    setEmployeeNumberError("");
+    return true;
+  };
+
+  const isValidUsername = (data, field, setDataError) => {
+    if (!data || typeof data !== "string") {
+      setDataError(`${field} is Required`);
+      return false;
+    }
+
+    const usernameRegex = /^[a-zA-Z0-9_-]+$/;
+
+    if (!usernameRegex.test(data)) {
+      setDataError(
+        `${field} should only contain letters, numbers, underscores, and hyphens`
+      );
+      return false;
+    }
+
+    setDataError("");
+    return true;
+  };
+
+  const isValidGovNumber = (data, field, setDataError) => {
+    if (field === "Philhealth" || field === "PAG-IBIG") {
+      if (data?.length !== 14) {
+        setDataError(`${field} number is not valid`);
+        return false;
+      }
+      setDataError("");
+      return true;
+    }
+    if (field === "Tin Number") {
+      if (data?.length !== 15) {
+        setDataError(`${field} number is not valid`);
+        return false;
+      }
+      setDataError("");
+      return true;
+    }
+  };
+
+  const ValidatePageTwo = () => {
+    const usernameValid =
+      notEmpty(username, "Username", setUsernameError) &&
+      isValidUsername(username, "Username", setUsernameError);
+    const positionValid =
+      notEmpty(position, "Position", setPositionError) &&
+      isValidSelection(position, "Position", setPositionError);
+    const roleValid =
+      notEmpty(role, "Role", setRoleError) &&
+      isValidSelection(role, "Role", setRoleError);
+    const employeeNumberValid = employeeNumberValidate();
+
+    const philhealthValid =
+      notEmpty(philhealth, "Philhealth", setphilhealthError) &&
+      isValidGovNumber(philhealth, "Philhealth", setphilhealthError);
+    const pagibigValid =
+      notEmpty(pagibig, "PAG-IBIG", setPagibigError) &&
+      isValidGovNumber(pagibig, "PAG-IBIG", setPagibigError);
+    const tinnumberValid =
+      notEmpty(tinnumber, "Tin Number", setTinnumberError) &&
+      isValidGovNumber(tinnumber, "Tin Number", setTinnumberError);
+
+    if (
+      usernameValid &&
+      positionValid &&
+      roleValid &&
+      employeeNumberValid &&
+      philhealthValid &&
+      pagibigValid &&
+      tinnumberValid
+    ) {
+      return true;
+    }
+    return false;
+  };
+
   const handleEditUser = async () => {
+    setIsLoading(true);
+    const passed = ValidatePageTwo() && validatePageOne();
+
+    if (!passed) {
+      handleSnackbar(
+        true,
+        "error",
+        "Please provide information in all fields."
+      );
+      return;
+    }
+    const formData = new FormData();
+
     const parsedDate = dayjs(selectedRow?.birthday);
 
     const selectedRowValues = {
@@ -223,9 +641,6 @@ const EditUser = (props) => {
       philhealth,
       pagibig,
       tin_number: tinnumber,
-      // nbi_clearance: nbiClearanceFile,
-      // resume_cv: resumeCvFile,
-      // portfolio: portfolioFile,
       pod_designation: "Edda POD",
     };
 
@@ -239,14 +654,49 @@ const EditUser = (props) => {
       Object.entries(data).filter(([_, value]) => value !== "")
     );
 
-    const site = import.meta.env.VITE_SITE;
-    const result = await axios.put(
-      `http://${site}:3000/api/user/${selectedRow?._id}`,
-      filteredData
-    );
+    const userDataBlob = new Blob([JSON.stringify(filteredData)], {
+      type: "application/json",
+    });
 
-    if (result.status === 200) {
-      setSnackbarOpen(true);
+    formData.append("user_data", userDataBlob, "user_data.json");
+
+    if (nbiClearanceFile) {
+      formData.append("nbi_clearance", nbiClearanceFile);
+    }
+
+    if (resumeCvFile) {
+      formData.append("resume_cv", resumeCvFile);
+    }
+
+    if (portfolioFile) {
+      formData.append("portfolio", portfolioFile);
+    }
+
+    const config = {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    };
+
+    try {
+      const site = import.meta.env.VITE_SITE;
+      const promise = await axios.put(
+        `http://${site}:3000/api/user/${selectedRow?._id}`,
+        formData,
+        config
+      );
+      const result = await promise;
+
+      if (result.status === 200) {
+        setIsLoading(false);
+        handleSnackbar(
+          true,
+          "success",
+          "Operation complete. User successfully edited."
+        );
+      }
+    } catch (error) {
+      console.error("Error creating user:", error.message);
     }
   };
 
@@ -336,6 +786,24 @@ const EditUser = (props) => {
     setTinnumber(selectedRow?.tin_number);
   };
 
+  const handleSnackbar = (open, severity, message) => {
+    if (open === true) {
+      setSnackbarOpen(open);
+      setSnackbarSeverity(severity);
+      setSnackbarMessage(message);
+    } else {
+      setSnackbarOpen(open);
+    }
+  };
+
+  const handleMenuClick = (event, set) => {
+    set(event.currentTarget);
+  };
+
+  const handleMenuClose = (set) => {
+    set(null);
+  };
+
   useEffect(() => {
     fetchRelationships();
     fetchOptions();
@@ -343,11 +811,7 @@ const EditUser = (props) => {
   }, []);
 
   useEffect(() => {
-    if (
-      relationshipOptions.length > 0 &&
-      roleOptions.length > 0 &&
-      positionOptions.length > 0
-    ) {
+    if (!!selectedRow) {
       fetchUserData();
     }
   }, [selectedRow]);
@@ -409,13 +873,17 @@ const EditUser = (props) => {
                   First Name
                 </InputLabel>
                 <TextField
-                  disabled={confirmEdit}
+                  error={!!firstNameError}
+                  helperText={firstNameError}
+                  disabled={isLoading || confirmEdit}
                   fullWidth
                   id="first-name"
                   variant="outlined"
                   label="First Name"
                   value={firstName}
-                  onChange={handleFirstNameChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setFirstName, setFirstNameError);
+                  }}
                 />
                 <InputLabel
                   htmlFor="address"
@@ -428,13 +896,17 @@ const EditUser = (props) => {
                   Address
                 </InputLabel>
                 <TextField
-                  disabled={confirmEdit}
+                  error={!!addressError}
+                  helperText={addressError}
+                  disabled={isLoading || confirmEdit}
                   fullWidth
                   id="address"
                   variant="outlined"
                   label="Address"
                   value={address}
-                  onChange={handleAddressChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setAddress, setAddressError);
+                  }}
                 />
                 <InputLabel
                   htmlFor="email-address"
@@ -447,13 +919,17 @@ const EditUser = (props) => {
                   Email Address
                 </InputLabel>
                 <TextField
-                  disabled={confirmEdit}
+                  error={!!emailError}
+                  helperText={emailError}
+                  disabled={isLoading || confirmEdit}
                   fullWidth
                   id="email-address"
                   variant="outlined"
                   label="Email Address"
                   value={email}
-                  onChange={handleEmailChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setEmail, setEmailError);
+                  }}
                 />
               </Stack>
             </Grid>
@@ -469,13 +945,17 @@ const EditUser = (props) => {
                   Last Name
                 </InputLabel>
                 <TextField
-                  disabled={confirmEdit}
+                  error={!!lastNameError}
+                  helperText={lastNameError}
+                  disabled={isLoading || confirmEdit}
                   fullWidth
                   id="last-name"
                   variant="outlined"
                   label="Last Name"
                   value={lastName}
-                  onChange={handleLastNameChange}
+                  onChange={(e) => {
+                    onChangeHandler(e, setLastName, setLastNameError);
+                  }}
                 />
                 <Stack direction="row">
                   <Grid container spacing={2}>
@@ -491,21 +971,26 @@ const EditUser = (props) => {
                         >
                           Birthday
                         </InputLabel>
-                        <LocalizationProvider
-                          dateAdapter={AdapterDayjs}
-                          fullWidth
-                        >
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
                           <DatePicker
-                            disabled={confirmEdit}
+                            disabled={isLoading || confirmEdit}
                             label="MM/DD/YYYY"
                             fullWidth
-                            value={birthday ?? null}
+                            value={birthday}
                             slotProps={{
                               field: { clearable: true },
+                              textField: {
+                                error: !!birthdayError,
+                                helperText: birthdayError,
+                              },
                             }}
-                            onChange={(newValue) =>
-                              handleBirthdayChange(newValue)
-                            }
+                            renderInput={(params) => {
+                              <TextField {...params} />;
+                            }}
+                            onChange={(newValue) => {
+                              handleBirthdayChange(newValue);
+                              setBirthdayError("");
+                            }}
                           />
                         </LocalizationProvider>
                       </Stack>
@@ -522,19 +1007,26 @@ const EditUser = (props) => {
                         >
                           Gender
                         </InputLabel>
-                        <FormControl fullWidth variant="outlined">
+                        <FormControl
+                          fullWidth
+                          variant="outlined"
+                          error={!!genderError}
+                        >
                           <InputLabel id="gender-label">Gender</InputLabel>
                           <Select
-                            disabled={confirmEdit}
+                            disabled={isLoading || confirmEdit}
                             abelId="gender-label"
                             id="gender"
                             value={gender}
-                            onChange={handleGenderChange}
+                            onChange={(e) => {
+                              onChangeHandler(e, setGender, setGenderError);
+                            }}
                             label="Gender"
                           >
                             <MenuItem value="Male">Male</MenuItem>
                             <MenuItem value="Female">Female</MenuItem>
                           </Select>
+                          <FormHelperText>{genderError}</FormHelperText>
                         </FormControl>
                       </Stack>
                     </Grid>
@@ -551,13 +1043,23 @@ const EditUser = (props) => {
                   Contact Number
                 </InputLabel>
                 <TextField
-                  disabled={confirmEdit}
+                  error={!!contactNumberError}
+                  helperText={contactNumberError}
+                  disabled={isLoading || confirmEdit}
                   fullWidth
                   id="contact-number"
                   variant="outlined"
                   label="Enter Number"
                   value={contactNumber}
-                  onChange={handleContactNumberChange}
+                  onChange={(e) => {
+                    onChangeNumberHandler(
+                      e,
+                      setContactNumber,
+                      "phone",
+                      "",
+                      setContactNumberError
+                    );
+                  }}
                 />
               </Stack>
             </Grid>
@@ -578,13 +1080,21 @@ const EditUser = (props) => {
                 Emergency Contact
               </InputLabel>
               <TextField
-                disabled={confirmEdit}
+                error={!!emergencyContactError}
+                helperText={emergencyContactError}
+                disabled={isLoading || confirmEdit}
                 fullWidth
                 id="first-name"
                 variant="outlined"
                 label="Enter Full Name"
                 value={emergencyContact}
-                onChange={handleEmergencyContactChange}
+                onChange={(e) => {
+                  onChangeHandler(
+                    e,
+                    setEmergencyContact,
+                    setEmergencyContactError
+                  );
+                }}
               />
             </Grid>
             <Grid item xs={6}>
@@ -598,13 +1108,23 @@ const EditUser = (props) => {
                 Contact Number
               </InputLabel>
               <TextField
-                disabled={confirmEdit}
+                error={!!emergencyNumberError}
+                helperText={emergencyNumberError}
+                disabled={isLoading || confirmEdit}
                 fullWidth
                 id="emergency-number"
                 variant="outlined"
-                label="Emergency Number"
+                label="Enter Number"
                 value={emergencyNumber}
-                onChange={handleEmergencyNumberChange}
+                onChange={(e) => {
+                  onChangeNumberHandler(
+                    e,
+                    setEmergencyNumber,
+                    "phone",
+                    "",
+                    setEmergencyNumberError
+                  );
+                }}
               />
             </Grid>
             <Grid item xs={6}>
@@ -618,7 +1138,7 @@ const EditUser = (props) => {
                 Relationship
               </InputLabel>
               <Autocomplete
-                disabled={confirmEdit}
+                disabled={isLoading || confirmEdit}
                 selectOnFocus
                 clearOnBlur
                 handleHomeEndKeys
@@ -626,6 +1146,7 @@ const EditUser = (props) => {
                 fullWidth
                 value={relationship}
                 onChange={(event, newValue) => {
+                  setRelationshipError("");
                   if (newValue && newValue.label.startsWith('Add "')) {
                     const extractedValue = newValue.label
                       .replace('Add "', "")
@@ -659,6 +1180,8 @@ const EditUser = (props) => {
                     label="Relationship"
                     variant="outlined"
                     fullWidth
+                    error={!!relationshipError}
+                    helperText={relationshipError}
                   />
                 )}
                 renderOption={(props, option) => (
@@ -667,6 +1190,7 @@ const EditUser = (props) => {
               />
             </Grid>
           </Grid>
+          {isLoading && <LinearProgress sx={{ marginTop: "40px" }} />}
         </DialogContent>
         <DialogActions
           sx={{
@@ -695,7 +1219,7 @@ const EditUser = (props) => {
             Next
           </Button>
           <Button
-            disabled={confirmEdit}
+            disabled={isLoading || confirmEdit}
             onClick={handleEditUser}
             variant="contained"
             color="success"
@@ -785,6 +1309,7 @@ const EditUser = (props) => {
                 paddingTop: "20px",
                 paddingBottom: "20px",
                 paddingLeft: "60px",
+                paddingRight: "60px",
               }}
             >
               <Grid container spacing={2}>
@@ -800,13 +1325,17 @@ const EditUser = (props) => {
                       Username
                     </InputLabel>
                     <TextField
-                      disabled={confirmEdit}
+                      error={!!usernameError}
+                      helperText={usernameError}
+                      disabled={isLoading || confirmEdit}
                       fullWidth
                       id="user-name"
                       variant="outlined"
                       label="Username"
                       value={username}
-                      onChange={handleUsernameChange}
+                      onChange={(e) => {
+                        onChangeHandler(e, setUsername, setUsernameError);
+                      }}
                     />
                     <InputLabel
                       htmlFor="password"
@@ -819,14 +1348,18 @@ const EditUser = (props) => {
                       Password
                     </InputLabel>
                     <TextField
-                      disabled={confirmEdit}
+                      error={!!passwordError}
+                      helperText={passwordError}
+                      disabled={isLoading || confirmEdit}
                       id="password"
                       label="Password"
                       variant="outlined"
                       fullWidth
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        onChangeHandler(e, setPassword, setPasswordError);
+                      }}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -845,7 +1378,7 @@ const EditUser = (props) => {
                       }}
                     />
                     <Button
-                      disabled={confirmEdit}
+                      disabled={isLoading || confirmEdit}
                       sx={{
                         alignSelf: "flex-start",
                         marginTop: "35px",
@@ -876,7 +1409,7 @@ const EditUser = (props) => {
                       Position
                     </InputLabel>
                     <Autocomplete
-                      disabled={confirmEdit}
+                      disabled={isLoading || confirmEdit}
                       selectOnFocus
                       clearOnBlur
                       handleHomeEndKeys
@@ -884,6 +1417,7 @@ const EditUser = (props) => {
                       fullWidth
                       value={position}
                       onChange={(event, newValue) => {
+                        setPositionError("");
                         if (newValue && newValue.label.startsWith('Add "')) {
                           const extractedValue = newValue.label
                             .replace('Add "', "")
@@ -917,6 +1451,8 @@ const EditUser = (props) => {
                           label="Position"
                           variant="outlined"
                           fullWidth
+                          error={!!positionError}
+                          helperText={positionError}
                         />
                       )}
                       renderOption={(props, option) => (
@@ -934,7 +1470,7 @@ const EditUser = (props) => {
                       Role
                     </InputLabel>
                     <Autocomplete
-                      disabled={confirmEdit}
+                      disabled={isLoading || confirmEdit}
                       selectOnFocus
                       clearOnBlur
                       handleHomeEndKeys
@@ -942,6 +1478,7 @@ const EditUser = (props) => {
                       fullWidth
                       value={role}
                       onChange={(event, newValue) => {
+                        setRoleError("");
                         if (newValue && newValue.label.startsWith('Add "')) {
                           const extractedValue = newValue.label
                             .replace('Add "', "")
@@ -975,6 +1512,8 @@ const EditUser = (props) => {
                           label="Role"
                           variant="outlined"
                           fullWidth
+                          error={!!roleError}
+                          helperText={roleError}
                         />
                       )}
                       renderOption={(props, option) => (
@@ -1000,13 +1539,24 @@ const EditUser = (props) => {
                         Employee Number
                       </InputLabel>
                       <TextField
-                        disabled={confirmEdit}
+                        error={!!employeeNumberError}
+                        helperText={employeeNumberError}
+                        onKeyDown={handleKeyDown}
+                        disabled={isLoading || confirmEdit}
                         fullWidth
                         id="employee-number"
                         variant="outlined"
                         label="Employee Number"
                         value={employeeNumber}
-                        onChange={handleEmployeeNumberChange}
+                        onChange={(e) => {
+                          onChangeNumberHandler(
+                            e,
+                            setEmployeeNumber,
+                            "acx",
+                            "",
+                            setEmployeeNumberError
+                          );
+                        }}
                       />
                     </Stack>
                   </Stack>
@@ -1031,13 +1581,23 @@ const EditUser = (props) => {
                       Philhealth
                     </InputLabel>
                     <TextField
-                      disabled={confirmEdit}
+                      error={!!philhealthError}
+                      helperText={philhealthError}
+                      disabled={isLoading || confirmEdit}
                       fullWidth
                       id="philhealth"
                       variant="outlined"
                       label="Philhealth"
                       value={philhealth}
-                      onChange={handlePhilhealth}
+                      onChange={(e) => {
+                        onChangeNumberHandler(
+                          e,
+                          setphilhealth,
+                          "gov",
+                          "philhealth",
+                          setphilhealthError
+                        );
+                      }}
                     />
                     <InputLabel
                       htmlFor="pag-ibig"
@@ -1050,13 +1610,23 @@ const EditUser = (props) => {
                       PAG-IBIG
                     </InputLabel>
                     <TextField
-                      disabled={confirmEdit}
+                      error={!!pagibigError}
+                      helperText={pagibigError}
+                      disabled={isLoading || confirmEdit}
                       fullWidth
                       id="pag-ibig"
                       variant="outlined"
                       label="PAG-IBIG"
                       value={pagibig}
-                      onChange={handlePagibigChange}
+                      onChange={(e) => {
+                        onChangeNumberHandler(
+                          e,
+                          setPagibig,
+                          "gov",
+                          "pagibig",
+                          setPagibigError
+                        );
+                      }}
                     />
                     <InputLabel
                       htmlFor="tin-number"
@@ -1069,13 +1639,23 @@ const EditUser = (props) => {
                       Tin Number
                     </InputLabel>
                     <TextField
-                      disabled={confirmEdit}
+                      error={!!tinnumberError}
+                      helperText={tinnumberError}
+                      disabled={isLoading || confirmEdit}
                       fullWidth
                       id="tin-number"
                       variant="outlined"
                       label="Tin Number"
                       value={tinnumber}
-                      onChange={handleTinnumberChange}
+                      onChange={(e) => {
+                        onChangeNumberHandler(
+                          e,
+                          setTinnumber,
+                          "gov",
+                          "tinnumber",
+                          setTinnumberError
+                        );
+                      }}
                     />
                   </Stack>
                 </Grid>
@@ -1089,32 +1669,90 @@ const EditUser = (props) => {
                     </InputLabel>
                     {nbiClearanceFile === null ? (
                       <>
-                        <Input
-                          disabled={confirmEdit}
-                          type="file"
-                          id="nbi-clearance"
-                          sx={{ display: "none" }}
-                          onChange={(event) => {
-                            handleFileChange(event, setNbiClearanceFile);
-                          }}
-                        />
-                        <label htmlFor="nbi-clearance">
+                        <Stack direction="row">
                           <Button
-                            disabled={confirmEdit}
-                            variant="outlined"
+                            color={"success"}
+                            disabled={isLoading || confirmEdit}
+                            variant="contained"
                             component="span"
-                            startIcon={<UploadIcon />}
+                            startIcon={<VisibilityOutlinedIcon />}
                             sx={{ paddingX: "60px", paddingY: "15px" }}
+                            onClick={() => {
+                              window.open(
+                                selectedRow.nbi_clerance_url,
+                                "_blank"
+                              );
+                            }}
                           >
-                            Upload
+                            View
                           </Button>
-                        </label>
+                          <IconButton
+                            disabled={isLoading || confirmEdit}
+                            sx={{ paddingX: "15px", paddingY: "10px" }}
+                            variant="contained"
+                            onClick={(event) => {
+                              handleMenuClick(event, setAnchorElNbi);
+                            }}
+                          >
+                            <MoreVertOutlinedIcon />
+                          </IconButton>
+                          <Menu
+                            anchorEl={anchorElNbi}
+                            open={Boolean(anchorElNbi)}
+                            onClose={() => {
+                              handleMenuClose(setAnchorElNbi);
+                            }}
+                          >
+                            <Input
+                              disabled={isLoading || confirmEdit}
+                              type="file"
+                              id="nbi-clearance"
+                              sx={{ display: "none" }}
+                              onChange={(event) => {
+                                handleFileChange(
+                                  event,
+                                  setNbiClearanceFile,
+                                  setNbiClearanceFileError,
+                                  "acx_nbi_clearance"
+                                );
+                                handleMenuClose(setAnchorElNbi);
+                              }}
+                            />
+                            <label htmlFor="nbi-clearance">
+                              <MenuItem
+                                sx={{
+                                  textTransform: "uppercase",
+                                  color: "#2e7d32",
+                                  paddingX: "20px",
+                                  paddingY: "20px",
+                                }}
+                              >
+                                Update
+                                <UploadIcon sx={{ marginLeft: "10px" }} />
+                              </MenuItem>
+                            </label>
+                            <MenuItem
+                              onClick={() => {
+                                handleMenuClose(setAnchorElNbi);
+                              }}
+                              sx={{
+                                textTransform: "uppercase",
+                                color: "#d32f2f",
+                                paddingX: "20px",
+                                paddingY: "20px",
+                              }}
+                            >
+                              Close
+                              <CloseIcon sx={{ marginLeft: "10px" }} />
+                            </MenuItem>
+                          </Menu>
+                        </Stack>
                       </>
                     ) : (
                       <>
                         <label htmlFor="nbi-clearance-cancel">
                           <Button
-                            disabled={confirmEdit}
+                            disabled={isLoading || confirmEdit}
                             color="error"
                             variant="contained"
                             component="span"
@@ -1124,7 +1762,7 @@ const EditUser = (props) => {
                               handleFileChangeCancel(setNbiClearanceFile)
                             }
                           >
-                            Clear
+                            Cancel
                           </Button>
                         </label>
                       </>
@@ -1141,32 +1779,87 @@ const EditUser = (props) => {
                     </InputLabel>
                     {resumeCvFile === null ? (
                       <>
-                        <Input
-                          disabled={confirmEdit}
-                          type="file"
-                          id="resume-cv"
-                          sx={{ display: "none" }}
-                          onChange={(event) =>
-                            handleFileChange(event, setResumeCvFile)
-                          }
-                        />
-                        <label htmlFor="resume-cv">
+                        <Stack direction="row">
                           <Button
-                            disabled={confirmEdit}
-                            variant="outlined"
+                            color={"success"}
+                            disabled={isLoading || confirmEdit}
+                            variant="contained"
                             component="span"
-                            startIcon={<UploadIcon />}
+                            startIcon={<VisibilityOutlinedIcon />}
                             sx={{ paddingX: "60px", paddingY: "15px" }}
+                            onClick={() => {
+                              window.open(selectedRow.resume_cv_url, "_blank");
+                            }}
                           >
-                            Upload
+                            View
                           </Button>
-                        </label>
+                          <IconButton
+                            disabled={isLoading || confirmEdit}
+                            sx={{ paddingX: "15px", paddingY: "10px" }}
+                            variant="contained"
+                            onClick={(event) => {
+                              handleMenuClick(event, setAnchorElResume);
+                            }}
+                          >
+                            <MoreVertOutlinedIcon />
+                          </IconButton>
+                          <Menu
+                            anchorEl={anchorElResume}
+                            open={Boolean(anchorElResume)}
+                            onClose={() => {
+                              handleMenuClose(setAnchorElResume);
+                            }}
+                          >
+                            <Input
+                              disabled={isLoading || confirmEdit}
+                              type="file"
+                              id="resume-cv"
+                              sx={{ display: "none" }}
+                              onChange={(event) => {
+                                handleFileChange(
+                                  event,
+                                  setResumeCvFile,
+                                  setResumeCvFileError,
+                                  "acx_resume"
+                                );
+                                handleMenuClose(setAnchorElResume);
+                              }}
+                            />
+                            <label htmlFor="resume-cv">
+                              <MenuItem
+                                sx={{
+                                  textTransform: "uppercase",
+                                  color: "#2e7d32",
+                                  paddingX: "20px",
+                                  paddingY: "20px",
+                                }}
+                              >
+                                Update
+                                <UploadIcon sx={{ marginLeft: "10px" }} />
+                              </MenuItem>
+                            </label>
+                            <MenuItem
+                              onClick={() => {
+                                handleMenuClose(setAnchorElResume);
+                              }}
+                              sx={{
+                                textTransform: "uppercase",
+                                color: "#d32f2f",
+                                paddingX: "20px",
+                                paddingY: "20px",
+                              }}
+                            >
+                              Close
+                              <CloseIcon sx={{ marginLeft: "10px" }} />
+                            </MenuItem>
+                          </Menu>
+                        </Stack>
                       </>
                     ) : (
                       <>
                         <label htmlFor="resume-cv-cancel">
                           <Button
-                            disabled={confirmEdit}
+                            disabled={isLoading || confirmEdit}
                             color="error"
                             variant="contained"
                             component="span"
@@ -1176,7 +1869,7 @@ const EditUser = (props) => {
                               handleFileChangeCancel(setResumeCvFile)
                             }
                           >
-                            Clear
+                            Cancel
                           </Button>
                         </label>
                       </>
@@ -1193,32 +1886,87 @@ const EditUser = (props) => {
                     </InputLabel>
                     {portfolioFile === null ? (
                       <>
-                        <Input
-                          disabled={confirmEdit}
-                          type="file"
-                          id="portfolio"
-                          sx={{ display: "none" }}
-                          onChange={(event) =>
-                            handleFileChange(event, setPortfolioFile)
-                          }
-                        />
-                        <label htmlFor="portfolio">
+                        <Stack direction="row">
                           <Button
-                            disabled={confirmEdit}
-                            variant="outlined"
+                            color={"success"}
+                            disabled={isLoading || confirmEdit}
+                            variant="contained"
                             component="span"
-                            startIcon={<UploadIcon />}
+                            startIcon={<VisibilityOutlinedIcon />}
                             sx={{ paddingX: "60px", paddingY: "15px" }}
+                            onClick={() => {
+                              window.open(selectedRow.portfolio_url, "_blank");
+                            }}
                           >
-                            Upload
+                            View
                           </Button>
-                        </label>
+                          <IconButton
+                            disabled={isLoading || confirmEdit}
+                            sx={{ paddingX: "15px", paddingY: "10px" }}
+                            variant="contained"
+                            onClick={(event) => {
+                              handleMenuClick(event, setAnchorElPortfolio);
+                            }}
+                          >
+                            <MoreVertOutlinedIcon />
+                          </IconButton>
+                          <Menu
+                            anchorEl={anchorElPortfolio}
+                            open={Boolean(anchorElPortfolio)}
+                            onClose={() => {
+                              handleMenuClose(setAnchorElPortfolio);
+                            }}
+                          >
+                            <Input
+                              disabled={isLoading || confirmEdit}
+                              type="file"
+                              id="portfolio-file"
+                              sx={{ display: "none" }}
+                              onChange={(event) => {
+                                handleFileChange(
+                                  event,
+                                  setPortfolioFile,
+                                  setPortfolioFileError,
+                                  "acx_portfolio"
+                                );
+                                handleMenuClose(setAnchorElPortfolio);
+                              }}
+                            />
+                            <label htmlFor="portfolio-file">
+                              <MenuItem
+                                sx={{
+                                  textTransform: "uppercase",
+                                  color: "#2e7d32",
+                                  paddingX: "20px",
+                                  paddingY: "20px",
+                                }}
+                              >
+                                Update
+                                <UploadIcon sx={{ marginLeft: "10px" }} />
+                              </MenuItem>
+                            </label>
+                            <MenuItem
+                              onClick={() => {
+                                handleMenuClose(setAnchorElPortfolio);
+                              }}
+                              sx={{
+                                textTransform: "uppercase",
+                                color: "#d32f2f",
+                                paddingX: "20px",
+                                paddingY: "20px",
+                              }}
+                            >
+                              Close
+                              <CloseIcon sx={{ marginLeft: "10px" }} />
+                            </MenuItem>
+                          </Menu>
+                        </Stack>
                       </>
                     ) : (
                       <>
                         <label htmlFor="portfolio-cancel">
                           <Button
-                            disabled={confirmEdit}
+                            disabled={isLoading || confirmEdit}
                             color="error"
                             variant="contained"
                             component="span"
@@ -1228,7 +1976,7 @@ const EditUser = (props) => {
                               handleFileChangeCancel(setPortfolioFile)
                             }
                           >
-                            Clear
+                            Cancel
                           </Button>
                         </label>
                       </>
@@ -1238,6 +1986,7 @@ const EditUser = (props) => {
               </Grid>
             </Stack>
           </Stack>
+          {isLoading && <LinearProgress sx={{ marginTop: "20px" }} />}
         </DialogContent>
         <DialogActions
           sx={{
@@ -1304,6 +2053,7 @@ const EditUser = (props) => {
           <p className="mt-[5px] mb-[5px]">
             Are you sure you want to delete this user?
           </p>
+          {isLoading && <LinearProgress sx={{ marginTop: "40px" }} />}
         </DialogContent>
         <DialogActions>
           <Button
@@ -1325,6 +2075,7 @@ const EditUser = (props) => {
             No
           </Button>
           <Button
+            disabled={isLoading}
             onClick={handleOnDelete}
             variant="contained"
             color="error"
@@ -1346,9 +2097,28 @@ const EditUser = (props) => {
         open={snackbarOpen}
         autoHideDuration={1000}
         onClose={() => {
-          setSnackbarOpen(false);
-          setEditClickedTwo(false);
-          window.location.reload();
+          if (
+            snackbarMessage === "Operation complete. User successfully edited."
+          ) {
+            handleSnackbar(false, "", "");
+            clearData();
+            handleCancelclick();
+            handleCancelclickPageTwo();
+            window.location.reload();
+            return;
+          }
+          if (
+            snackbarMessage === "Operation complete. User successfully deleted."
+          ) {
+            handleSnackbar(false, "", "");
+            handleCancelclick();
+            handleCancelclickPageTwo();
+            setConfirmDelete(false);
+            handleClose();
+            window.location.reload();
+            return;
+          }
+          handleSnackbar(false, "", "");
         }}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         sx={{
@@ -1359,36 +2129,31 @@ const EditUser = (props) => {
           elevation={6}
           variant="filled"
           onClose={() => {
-            setSnackbarOpen(false);
+            if (
+              snackbarMessage ===
+              "Operation complete. User successfully edited."
+            ) {
+              handleSnackbar(false, "", "");
+              clearData();
+              handleEditClick();
+              window.location.reload();
+              return;
+            }
+            if (
+              snackbarMessage ===
+              "Operation complete. User successfully deleted."
+            ) {
+              handleSnackbar(false, "", "");
+              setConfirmDelete(false);
+              handleClose();
+              window.location.reload();
+              return;
+            }
+            handleSnackbar(false, "", "");
           }}
-          severity="success"
+          severity={snackbarSeverity}
         >
-          User Edited
-        </MuiAlert>
-      </Snackbar>
-      <Snackbar
-        open={snackbarOpenDeleted}
-        autoHideDuration={1000}
-        onClose={() => {
-          setSnackbarOpenDeleted(false);
-          setConfirmDelete(false);
-          setEditClickedTwo(false);
-          window.location.reload();
-        }}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        sx={{
-          marginTop: "5rem",
-        }}
-      >
-        <MuiAlert
-          elevation={6}
-          variant="filled"
-          onClose={() => {
-            setSnackbarOpenDeleted(false);
-          }}
-          severity="success"
-        >
-          User Deleted
+          {snackbarMessage}
         </MuiAlert>
       </Snackbar>
     </>
