@@ -56,6 +56,20 @@ const uploadToDrive = async (file, type) => {
   }
 };
 
+const deleteFromDrive = async (fileId) => {
+  try {
+    const response = await drive.files.delete({
+      fileId: fileId,
+    });
+
+    console.log(`File deleted from Google Drive. File ID: ${fileId}`);
+    return response;
+  } catch (error) {
+    console.error("Error deleting file from Google Drive:", error.message);
+    throw error;
+  }
+};
+
 const addUser = asyncHandler(async (req, res) => {
   try {
     const userDataFile = req.files.find(
@@ -103,19 +117,20 @@ const addUser = asyncHandler(async (req, res) => {
       req.files.find((file) => file.fieldname === "nbi_clearance"),
       "nbi"
     );
+    user.nbi_clerance_url = `https://drive.google.com/file/d/${nbiId}/view`;
+    user.nbi_clerance_id = nbiId;
     const resumeId = await uploadToDrive(
       req.files.find((file) => file.fieldname === "resume_cv"),
       "resume"
     );
+    user.resume_cv_url = `https://drive.google.com/file/d/${resumeId}/view`;
+    user.resume_cv_id = resumeId;
     const portfolioId = await uploadToDrive(
       req.files.find((file) => file.fieldname === "portfolio"),
       "portfolio"
     );
-
-    user.nbi_clearance_id = nbiId;
-    user.resume_cv_id = resumeId;
+    user.portfolio_url = `https://drive.google.com/file/d/${portfolioId}/view`;
     user.portfolio_id = portfolioId;
-
     await user.save();
 
     res.status(200).json(`User Created: ${user._id}`);
@@ -212,6 +227,7 @@ const getUserById = asyncHandler(async (req, res) => {
 const updateUserById = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
+    const user = await User.findById(id);
 
     const userDataFile = req.files.find(
       (file) => file.fieldname === "user_data"
@@ -262,7 +278,10 @@ const updateUserById = asyncHandler(async (req, res) => {
 
     let nbiId;
     if (nbiClearanceFile) {
+      deleteFromDrive(user.nbi_clerance_id);
       nbiId = await uploadToDrive(nbiClearanceFile, "nbi");
+      updatedUser.nbi_clerance_url = `https://drive.google.com/file/d/${nbiId}/view`;
+      updatedUser.nbi_clerance_id = nbiId;
     }
 
     const resumeCvFile = req.files.find(
@@ -271,7 +290,10 @@ const updateUserById = asyncHandler(async (req, res) => {
 
     let resumeId;
     if (resumeCvFile) {
-      resumeId = await uploadToDrive(resumeCvFile, "resume_cv");
+      deleteFromDrive(user.resume_cv_id);
+      resumeId = await uploadToDrive(resumeCvFile, "resume");
+      updatedUser.resume_cv_url = `https://drive.google.com/file/d/${resumeId}/view`;
+      updatedUser.resume_cv_id = resumeId;
     }
 
     const portfolioFile = req.files.find(
@@ -280,12 +302,11 @@ const updateUserById = asyncHandler(async (req, res) => {
 
     let portfolioId;
     if (portfolioFile) {
+      deleteFromDrive(user.portfolio_id);
       portfolioId = await uploadToDrive(portfolioFile, "portfolio");
+      updatedUser.portfolio_url = `https://drive.google.com/file/d/${portfolioId}/view`;
+      updatedUser.portfolio_id = portfolioId;
     }
-
-    updatedUser.nbi_clearance_id = nbiId;
-    updatedUser.resume_cv_id = resumeId;
-    updatedUser.portfolio_id = portfolioId;
 
     await updatedUser.save();
 

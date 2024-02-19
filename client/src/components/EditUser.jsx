@@ -20,8 +20,10 @@ import {
   Alert as MuiAlert,
   LinearProgress,
   FormHelperText,
+  Menu,
 } from "@mui/material";
 import axios from "axios";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import { createFilterOptions } from "@mui/material/Autocomplete";
 import CloseIcon from "@mui/icons-material/Close";
 import { useEffect, useState } from "react";
@@ -34,6 +36,7 @@ import UploadIcon from "@mui/icons-material/Upload";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 
 const EditUser = (props) => {
   const filter = createFilterOptions();
@@ -97,6 +100,9 @@ const EditUser = (props) => {
   const [confirmEdit, setConfirmEdit] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [anchorElNbi, setAnchorElNbi] = useState(null);
+  const [anchorElResume, setAnchorElResume] = useState(null);
+  const [anchorElPortfolio, setAnchorElPortfolio] = useState(null);
 
   const dateObject = birthday instanceof dayjs ? birthday?.toDate() : null;
 
@@ -112,12 +118,24 @@ const EditUser = (props) => {
     setFile(null);
   };
 
-  const handleFileChange = (event, setFile, setError) => {
+  const handleFileChange = (event, setFile, setError, filename) => {
     const selectedFile = event.target.files[0];
 
     if (selectedFile && selectedFile.type === "application/pdf") {
-      setFile(selectedFile);
-      setError("");
+      const containsFilename = selectedFile.name.includes(filename);
+      const isFirstLetterCapital = /^[A-Z]/.test(selectedFile.name);
+
+      if (containsFilename && isFirstLetterCapital) {
+        setFile(selectedFile);
+        setError("");
+      } else {
+        handleSnackbar(
+          true,
+          "error",
+          `Please select a PDF file with the filename format: Surname_${filename}.`
+        );
+        event.target.value = null;
+      }
     } else {
       handleSnackbar(true, "error", "Please select a PDF file to proceed.");
       event.target.value = null;
@@ -235,8 +253,11 @@ const EditUser = (props) => {
     setphilhealthError("");
     setPagibigError("");
     setTinnumberError("");
+    setNbiClearanceFile(null);
     setNbiClearanceFileError("");
+    setResumeCvFile(null);
     setResumeCvFileError("");
+    setPortfolioFile(null);
     setPortfolioFileError("");
     setFirstNameError("");
     setLastNameError("");
@@ -773,6 +794,14 @@ const EditUser = (props) => {
     } else {
       setSnackbarOpen(open);
     }
+  };
+
+  const handleMenuClick = (event, set) => {
+    set(event.currentTarget);
+  };
+
+  const handleMenuClose = (set) => {
+    set(null);
   };
 
   useEffect(() => {
@@ -1640,36 +1669,84 @@ const EditUser = (props) => {
                     </InputLabel>
                     {nbiClearanceFile === null ? (
                       <>
-                        <Input
-                          disabled={isLoading || confirmEdit}
-                          type="file"
-                          id="nbi-clearance"
-                          sx={{ display: "none" }}
-                          onChange={(event) => {
-                            handleFileChange(
-                              event,
-                              setNbiClearanceFile,
-                              setNbiClearanceFileError
-                            );
-                          }}
-                        />
-                        <label htmlFor="nbi-clearance">
+                        <Stack direction="row">
                           <Button
-                            color={nbiClearanceFileError ? "error" : "primary"}
+                            color={"success"}
                             disabled={isLoading || confirmEdit}
-                            variant="outlined"
+                            variant="contained"
                             component="span"
-                            startIcon={<UploadIcon />}
+                            startIcon={<VisibilityOutlinedIcon />}
                             sx={{ paddingX: "60px", paddingY: "15px" }}
+                            onClick={() => {
+                              window.open(
+                                selectedRow.nbi_clerance_url,
+                                "_blank"
+                              );
+                            }}
                           >
-                            Upload
+                            View
                           </Button>
-                        </label>
-                        {nbiClearanceFileError && (
-                          <FormHelperText sx={{ color: "#d32f2f" }}>
-                            {nbiClearanceFileError}
-                          </FormHelperText>
-                        )}
+                          <IconButton
+                            disabled={isLoading || confirmEdit}
+                            sx={{ paddingX: "15px", paddingY: "10px" }}
+                            variant="contained"
+                            onClick={(event) => {
+                              handleMenuClick(event, setAnchorElNbi);
+                            }}
+                          >
+                            <MoreVertOutlinedIcon />
+                          </IconButton>
+                          <Menu
+                            anchorEl={anchorElNbi}
+                            open={Boolean(anchorElNbi)}
+                            onClose={() => {
+                              handleMenuClose(setAnchorElNbi);
+                            }}
+                          >
+                            <Input
+                              disabled={isLoading || confirmEdit}
+                              type="file"
+                              id="nbi-clearance"
+                              sx={{ display: "none" }}
+                              onChange={(event) => {
+                                handleFileChange(
+                                  event,
+                                  setNbiClearanceFile,
+                                  setNbiClearanceFileError,
+                                  "acx_nbi_clearance"
+                                );
+                                handleMenuClose(setAnchorElNbi);
+                              }}
+                            />
+                            <label htmlFor="nbi-clearance">
+                              <MenuItem
+                                sx={{
+                                  textTransform: "uppercase",
+                                  color: "#2e7d32",
+                                  paddingX: "20px",
+                                  paddingY: "20px",
+                                }}
+                              >
+                                Update
+                                <UploadIcon sx={{ marginLeft: "10px" }} />
+                              </MenuItem>
+                            </label>
+                            <MenuItem
+                              onClick={() => {
+                                handleMenuClose(setAnchorElNbi);
+                              }}
+                              sx={{
+                                textTransform: "uppercase",
+                                color: "#d32f2f",
+                                paddingX: "20px",
+                                paddingY: "20px",
+                              }}
+                            >
+                              Close
+                              <CloseIcon sx={{ marginLeft: "10px" }} />
+                            </MenuItem>
+                          </Menu>
+                        </Stack>
                       </>
                     ) : (
                       <>
@@ -1685,7 +1762,7 @@ const EditUser = (props) => {
                               handleFileChangeCancel(setNbiClearanceFile)
                             }
                           >
-                            Clear
+                            Cancel
                           </Button>
                         </label>
                       </>
@@ -1702,36 +1779,81 @@ const EditUser = (props) => {
                     </InputLabel>
                     {resumeCvFile === null ? (
                       <>
-                        <Input
-                          disabled={isLoading || confirmEdit}
-                          type="file"
-                          id="resume-cv"
-                          sx={{ display: "none" }}
-                          onChange={(event) =>
-                            handleFileChange(
-                              event,
-                              setResumeCvFile,
-                              setResumeCvFileError
-                            )
-                          }
-                        />
-                        <label htmlFor="resume-cv">
+                        <Stack direction="row">
                           <Button
-                            color={resumeCvFilError ? "error" : "primary"}
+                            color={"success"}
                             disabled={isLoading || confirmEdit}
-                            variant="outlined"
+                            variant="contained"
                             component="span"
-                            startIcon={<UploadIcon />}
+                            startIcon={<VisibilityOutlinedIcon />}
                             sx={{ paddingX: "60px", paddingY: "15px" }}
+                            onClick={() => {
+                              window.open(selectedRow.resume_cv_url, "_blank");
+                            }}
                           >
-                            Upload
+                            View
                           </Button>
-                        </label>
-                        {resumeCvFilError && (
-                          <FormHelperText sx={{ color: "#d32f2f" }}>
-                            {resumeCvFilError}
-                          </FormHelperText>
-                        )}
+                          <IconButton
+                            disabled={isLoading || confirmEdit}
+                            sx={{ paddingX: "15px", paddingY: "10px" }}
+                            variant="contained"
+                            onClick={(event) => {
+                              handleMenuClick(event, setAnchorElResume);
+                            }}
+                          >
+                            <MoreVertOutlinedIcon />
+                          </IconButton>
+                          <Menu
+                            anchorEl={anchorElResume}
+                            open={Boolean(anchorElResume)}
+                            onClose={() => {
+                              handleMenuClose(setAnchorElResume);
+                            }}
+                          >
+                            <Input
+                              disabled={isLoading || confirmEdit}
+                              type="file"
+                              id="resume-cv"
+                              sx={{ display: "none" }}
+                              onChange={(event) => {
+                                handleFileChange(
+                                  event,
+                                  setResumeCvFile,
+                                  setResumeCvFileError,
+                                  "acx_resume"
+                                );
+                                handleMenuClose(setAnchorElResume);
+                              }}
+                            />
+                            <label htmlFor="resume-cv">
+                              <MenuItem
+                                sx={{
+                                  textTransform: "uppercase",
+                                  color: "#2e7d32",
+                                  paddingX: "20px",
+                                  paddingY: "20px",
+                                }}
+                              >
+                                Update
+                                <UploadIcon sx={{ marginLeft: "10px" }} />
+                              </MenuItem>
+                            </label>
+                            <MenuItem
+                              onClick={() => {
+                                handleMenuClose(setAnchorElResume);
+                              }}
+                              sx={{
+                                textTransform: "uppercase",
+                                color: "#d32f2f",
+                                paddingX: "20px",
+                                paddingY: "20px",
+                              }}
+                            >
+                              Close
+                              <CloseIcon sx={{ marginLeft: "10px" }} />
+                            </MenuItem>
+                          </Menu>
+                        </Stack>
                       </>
                     ) : (
                       <>
@@ -1747,7 +1869,7 @@ const EditUser = (props) => {
                               handleFileChangeCancel(setResumeCvFile)
                             }
                           >
-                            Clear
+                            Cancel
                           </Button>
                         </label>
                       </>
@@ -1764,36 +1886,81 @@ const EditUser = (props) => {
                     </InputLabel>
                     {portfolioFile === null ? (
                       <>
-                        <Input
-                          disabled={isLoading || confirmEdit}
-                          type="file"
-                          id="portfolio"
-                          sx={{ display: "none" }}
-                          onChange={(event) =>
-                            handleFileChange(
-                              event,
-                              setPortfolioFile,
-                              setPortfolioFileError
-                            )
-                          }
-                        />
-                        <label htmlFor="portfolio">
+                        <Stack direction="row">
                           <Button
-                            color={portfolioFileError ? "error" : "primary"}
+                            color={"success"}
                             disabled={isLoading || confirmEdit}
-                            variant="outlined"
+                            variant="contained"
                             component="span"
-                            startIcon={<UploadIcon />}
+                            startIcon={<VisibilityOutlinedIcon />}
                             sx={{ paddingX: "60px", paddingY: "15px" }}
+                            onClick={() => {
+                              window.open(selectedRow.portfolio_url, "_blank");
+                            }}
                           >
-                            Upload
+                            View
                           </Button>
-                        </label>
-                        {portfolioFileError && (
-                          <FormHelperText sx={{ color: "#d32f2f" }}>
-                            {portfolioFileError}
-                          </FormHelperText>
-                        )}
+                          <IconButton
+                            disabled={isLoading || confirmEdit}
+                            sx={{ paddingX: "15px", paddingY: "10px" }}
+                            variant="contained"
+                            onClick={(event) => {
+                              handleMenuClick(event, setAnchorElPortfolio);
+                            }}
+                          >
+                            <MoreVertOutlinedIcon />
+                          </IconButton>
+                          <Menu
+                            anchorEl={anchorElPortfolio}
+                            open={Boolean(anchorElPortfolio)}
+                            onClose={() => {
+                              handleMenuClose(setAnchorElPortfolio);
+                            }}
+                          >
+                            <Input
+                              disabled={isLoading || confirmEdit}
+                              type="file"
+                              id="portfolio-file"
+                              sx={{ display: "none" }}
+                              onChange={(event) => {
+                                handleFileChange(
+                                  event,
+                                  setPortfolioFile,
+                                  setPortfolioFileError,
+                                  "acx_portfolio"
+                                );
+                                handleMenuClose(setAnchorElPortfolio);
+                              }}
+                            />
+                            <label htmlFor="portfolio-file">
+                              <MenuItem
+                                sx={{
+                                  textTransform: "uppercase",
+                                  color: "#2e7d32",
+                                  paddingX: "20px",
+                                  paddingY: "20px",
+                                }}
+                              >
+                                Update
+                                <UploadIcon sx={{ marginLeft: "10px" }} />
+                              </MenuItem>
+                            </label>
+                            <MenuItem
+                              onClick={() => {
+                                handleMenuClose(setAnchorElPortfolio);
+                              }}
+                              sx={{
+                                textTransform: "uppercase",
+                                color: "#d32f2f",
+                                paddingX: "20px",
+                                paddingY: "20px",
+                              }}
+                            >
+                              Close
+                              <CloseIcon sx={{ marginLeft: "10px" }} />
+                            </MenuItem>
+                          </Menu>
+                        </Stack>
                       </>
                     ) : (
                       <>
@@ -1809,7 +1976,7 @@ const EditUser = (props) => {
                               handleFileChangeCancel(setPortfolioFile)
                             }
                           >
-                            Clear
+                            Cancel
                           </Button>
                         </label>
                       </>
@@ -1935,7 +2102,8 @@ const EditUser = (props) => {
           ) {
             handleSnackbar(false, "", "");
             clearData();
-            handleEditClick();
+            handleCancelclick();
+            handleCancelclickPageTwo();
             window.location.reload();
             return;
           }
@@ -1943,6 +2111,8 @@ const EditUser = (props) => {
             snackbarMessage === "Operation complete. User successfully deleted."
           ) {
             handleSnackbar(false, "", "");
+            handleCancelclick();
+            handleCancelclickPageTwo();
             setConfirmDelete(false);
             handleClose();
             window.location.reload();

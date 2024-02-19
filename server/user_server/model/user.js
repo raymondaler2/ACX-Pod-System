@@ -65,6 +65,24 @@ const userSchema = mongoose.Schema(
     tin_number: {
       type: String,
     },
+    nbi_clerance_url: {
+      type: String,
+    },
+    resume_cv_url: {
+      type: String,
+    },
+    portfolio_url: {
+      type: String,
+    },
+    nbi_clerance_id: {
+      type: String,
+    },
+    resume_cv_id: {
+      type: String,
+    },
+    portfolio_id: {
+      type: String,
+    },
     pod_designation: {
       type: String,
     },

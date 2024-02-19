@@ -108,12 +108,24 @@ const CreateUser = (props) => {
     setFile(null);
   };
 
-  const handleFileChange = (event, setFile, setError) => {
+  const handleFileChange = (event, setFile, setError, filename) => {
     const selectedFile = event.target.files[0];
 
     if (selectedFile && selectedFile.type === "application/pdf") {
-      setFile(selectedFile);
-      setError("");
+      const containsFilename = selectedFile.name.includes(filename);
+      const isFirstLetterCapital = /^[A-Z]/.test(selectedFile.name);
+
+      if (containsFilename && isFirstLetterCapital) {
+        setFile(selectedFile);
+        setError("");
+      } else {
+        handleSnackbar(
+          true,
+          "error",
+          `Please select a PDF file with the filename format: Surname_${filename}.`
+        );
+        event.target.value = null;
+      }
     } else {
       handleSnackbar(true, "error", "Please select a PDF file to proceed.");
       event.target.value = null;
@@ -1536,7 +1548,8 @@ const CreateUser = (props) => {
                             handleFileChange(
                               event,
                               setNbiClearanceFile,
-                              setNbiClearanceFileError
+                              setNbiClearanceFileError,
+                              "acx_nbi_clearance"
                             );
                           }}
                         />
@@ -1598,7 +1611,8 @@ const CreateUser = (props) => {
                             handleFileChange(
                               event,
                               setResumeCvFile,
-                              setResumeCvFileError
+                              setResumeCvFileError,
+                              "acx_resume"
                             )
                           }
                         />
@@ -1660,7 +1674,8 @@ const CreateUser = (props) => {
                             handleFileChange(
                               event,
                               setPortfolioFile,
-                              setPortfolioFileError
+                              setPortfolioFileError,
+                              "acx_portfolio"
                             )
                           }
                         />
