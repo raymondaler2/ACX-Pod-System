@@ -8,6 +8,7 @@ import KnowledgebaseSOP from "./components/KnowledgebaseSOP.jsx";
 import UserProfile from "./pages/UserProfile.jsx";
 import Users from "./pages/Users.jsx";
 import axios from "axios";
+import { LinearProgress } from "@mui/material";
 
 const PrivateRoute = ({ element, isAuthenticated, fallbackPath }) => {
   return isAuthenticated ? element : <Navigate to={fallbackPath} />;
@@ -16,7 +17,7 @@ const PrivateRoute = ({ element, isAuthenticated, fallbackPath }) => {
 const App = () => {
   const location = useLocation();
   const [sopIDs, setSopIDs] = useState([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
 
   const fetchSopIDs = async () => {
     const site = import.meta.env.VITE_SITE;
@@ -48,54 +49,58 @@ const App = () => {
 
   return (
     <>
-      <Routes>
-        <Route
-          path="/Users"
-          element={
-            <PrivateRoute
-              element={<Users />}
-              isAuthenticated={isAuthenticated}
-              fallbackPath="/Login"
-            />
-          }
-        />
-        <Route path="/Login" element={<Login />} />
-        <Route path="/" element={<Home />} />
-        <Route
-          path="/Knowledgebase"
-          element={
-            <PrivateRoute
-              element={<Knowledgebase />}
-              isAuthenticated={isAuthenticated}
-              fallbackPath="/Login"
-            />
-          }
-        />
-        <Route
-          path="/UserProfile"
-          element={
-            <PrivateRoute
-              element={<UserProfile />}
-              isAuthenticated={isAuthenticated}
-              fallbackPath="/Login"
-            />
-          }
-        />
-        {sopIDs?.map((data) => (
+      {isAuthenticated === null ? (
+        <LinearProgress />
+      ) : (
+        <Routes>
           <Route
-            key={data._id}
-            path={`/Knowledgebase/${data._id}`}
+            path="/Users"
             element={
               <PrivateRoute
-                element={<KnowledgebaseSOP id={data._id} />}
+                element={<Users />}
                 isAuthenticated={isAuthenticated}
                 fallbackPath="/Login"
               />
             }
           />
-        ))}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route path="/Login" element={<Login />} />
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/Knowledgebase"
+            element={
+              <PrivateRoute
+                element={<Knowledgebase />}
+                isAuthenticated={isAuthenticated}
+                fallbackPath="/Login"
+              />
+            }
+          />
+          <Route
+            path="/UserProfile"
+            element={
+              <PrivateRoute
+                element={<UserProfile />}
+                isAuthenticated={isAuthenticated}
+                fallbackPath="/Login"
+              />
+            }
+          />
+          {sopIDs?.map((data) => (
+            <Route
+              key={data._id}
+              path={`/Knowledgebase/${data._id}`}
+              element={
+                <PrivateRoute
+                  element={<KnowledgebaseSOP id={data._id} />}
+                  isAuthenticated={isAuthenticated}
+                  fallbackPath="/Login"
+                />
+              }
+            />
+          ))}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      )}
     </>
   );
 };
