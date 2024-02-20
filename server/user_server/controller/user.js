@@ -322,6 +322,21 @@ const updateUserById = asyncHandler(async (req, res) => {
   }
 });
 
+const authenticateToken = asyncHandler(async (req, res) => {
+  const { token } = req.params;
+
+  if (!token) {
+    return res.status(401).json("Token not provided");
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (!user) {
+      return res.status(200).json(false);
+    }
+    res.status(200).json(true);
+  });
+});
+
 module.exports = {
   getUserById,
   getAllUser,
@@ -329,4 +344,5 @@ module.exports = {
   deleteUser,
   loginUser,
   updateUserById,
+  authenticateToken,
 };

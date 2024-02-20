@@ -115,6 +115,8 @@ const Login = () => {
 
     if (username && password) {
       const result = await LoginUser(username, password);
+      if (result) {
+      }
     }
   };
 
@@ -228,7 +230,9 @@ const Login = () => {
         autoHideDuration={1000}
         onClose={() => {
           handleSnackbar(false, "", "");
-          navigate("/");
+          if (snackbarMessage === "Access granted. Welcome back!") {
+            navigate("/");
+          }
         }}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         sx={{
@@ -240,7 +244,9 @@ const Login = () => {
           variant="filled"
           onClose={() => {
             handleSnackbar(false, "", "");
-            navigate("/");
+            if (snackbarMessage === "Access granted. Welcome back!") {
+              navigate("/");
+            }
           }}
           severity={snackbarSeverity}
         >
